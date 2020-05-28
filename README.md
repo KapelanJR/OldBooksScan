@@ -1,5 +1,5 @@
 1. Pobieramy i instalujemy CUDE 
-https://developer.nvidia.com/cuda-downloads
+https://www.tensorflow.org/install/gpu
 2. Pobieramy miniconde
 https://docs.conda.io/en/latest/miniconda.html
 3. Tworzymy VENV
