@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "C:\\Programowanie\\python\\python.exe"
+    "python.pythonPath": "C:\\Programowanie\\python\\python.exe",
+    "git.ignoreLimitWarning": true
 }
