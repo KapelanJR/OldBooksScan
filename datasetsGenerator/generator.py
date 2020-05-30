@@ -6,7 +6,7 @@ booksDirName = "books"
 datasetDirName = "datasets"
 datasetOutputName = "gen1"
 defaultCharLimit = 200
-pageOffset = 5
+pageOffset = 10
 
 #Klasa posiadająca dane o danym znaku
 class charData:
