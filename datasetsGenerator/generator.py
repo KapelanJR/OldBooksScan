@@ -4,17 +4,18 @@ import fitz
 #Ustawienia
 booksDirName = "books"
 datasetDirName = "datasets"
-datasetOutputName = "polish_lower1"
-defaultCharLimit = 200
-pageOffset = 10
+datasetOutputName = "polish_lower_and_upper1"
+defaultCharBookLimit = 200
+pageOffset = 12
 
 #Klasa posiadająca dane o danym znaku
 class charData:
-    def __init__(self, char, unicode, charLimit = defaultCharLimit):
+    def __init__(self, char, unicode, charBookLimit = defaultCharBookLimit):
         self.char = char
         self.unicode = unicode
-        self.charLimit = charLimit
-        self.count = 0
+        self.charBookLimit = charBookLimit
+        self.countBook = 0
+        self.countAll = 0
 
 #Lista znaków
 charList = [
@@ -33,14 +34,14 @@ charList = [
     #charData('q', "0071"), charData('v', "0076"), charData('x', "0078"),
 
     #Duże litery
-    #charData('A', "0041"), charData('B', "0042"), charData('C', "0043"), charData('D', "0044"), charData('E', "0045"), charData('F', "0046"),
-    #charData('G', "0047"), charData('H', "0048"), charData('I', "0049"), charData('J', "004a"), charData('K', "004b"), charData('L', "004c"),
-    #charData('M', "004d"), charData('N', "004e"), charData('O', "004f"), charData('P', "0050"), charData('R', "0052"), charData('S', "0053"),
-    #charData('t', "0054"), charData('u', "0055"), charData('w', "0057"), charData('y', "0059"), charData('z', "005a"), 
+    charData('A', "0041"), charData('B', "0042"), charData('C', "0043"), charData('D', "0044"), charData('E', "0045"), charData('F', "0046"),
+    charData('G', "0047"), charData('H', "0048"), charData('I', "0049"), charData('J', "004a"), charData('K', "004b"), charData('L', "004c"),
+    charData('M', "004d"), charData('N', "004e"), charData('O', "004f"), charData('P', "0050"), charData('R', "0052"), charData('S', "0053"),
+    charData('t', "0054"), charData('u', "0055"), charData('w', "0057"), charData('y', "0059"), charData('z', "005a"), 
 
     #Duże lietry polskie
-    #charData('Ą', "0104"), charData('Ć', "0106"), charData('Ę', "0118"), charData('Ł', "0141"), charData('Ń', "0143"), charData('Ó', "00d3"),
-    #charData('Ś', "015a"), charData('Ź', "0179"), charData('Ż', "017b"), 
+    charData('Ą', "0104"), charData('Ć', "0106"), charData('Ę', "0118"), charData('Ł', "0141"), charData('Ń', "0143"), charData('Ó', "00d3"),
+    charData('Ś', "015a"), charData('Ź', "0179"), charData('Ż', "017b"), 
 
     #Duże litery angielskie 
     #charData('q', "0051"), charData('v', "0056"), charData('x', "0058"),
@@ -70,15 +71,12 @@ def getBooksPaths():
 
     return booksPaths
 
-#Utwórz folder dla każdej książki i iteruj przez jej strony
+#Iteruj przez strony każdej książki
 def createBookDataset(bookPath):
     global currentBookPageCount
     global currentPageNumber
 
     book = fitz.open(bookPath)
-
-    if not os.path.exists(dirPath + datasetDirName + "/" + datasetOutputName + "/book" + str(currentBookNumber)):
-        os.makedirs(dirPath + datasetDirName + "/" + datasetOutputName + "/book" + str(currentBookNumber))
 
     currentBookPageCount = book.pageCount
     currentPageNumber = 0
@@ -88,27 +86,25 @@ def createBookDataset(bookPath):
         generationLoadingBar()
         createPageDataset(book[i])
 
-#Utwórz folder dla każdego znaku i wyszukaj ich występowania na danej stronie
+#Wyszukaj występowanie danego znaku w książce
 def createPageDataset(page):
     textBlocks = page.getText("rawdict", flags=fitz.TEXT_PRESERVE_LIGATURES + fitz.TEXT_PRESERVE_WHITESPACE)["blocks"]
     for charData in charList:
-        if not os.path.exists(dirPath + datasetDirName + "/" + datasetOutputName + "/book" + str(currentBookNumber) + "/" + charData.unicode):
-            os.makedirs(dirPath + datasetDirName + "/" + datasetOutputName + "/book" + str(currentBookNumber) + "/" + charData.unicode)
-        
         generateCharDataset(charData, searchForCaseSensitive(textBlocks, charData.char), page)
 
 #Zapisz znalezione fragmenty renderu PDF z danym szukanym znakiem jako obrazki PNG, każdy następny obrazek (danego znaku) ma nazwę o 1 większą niż poprzedni
 def generateCharDataset(charData, areas, page):
     for area in areas:
-        if charData.count < charData.charLimit:
-            charData.count += 1
+        if charData.countBook < charData.charBookLimit:
+            charData.countBook += 1
+            charData.countAll += 1
             img = page.getPixmap(matrix = fitz.Matrix(4, 4), clip = area.irect)
-            img.writeImage(dirPath + datasetDirName + "/" + datasetOutputName + "/book" + str(currentBookNumber) + "/" + charData.unicode + "/" + str(charData.count) + ".png")
+            img.writeImage(dirPath + datasetDirName + "/" + datasetOutputName + "/" + charData.unicode + "_" + str(charData.countAll) + ".png")
 
 #Po wygenerowaniu zbioru danych dla danej książki, wyczyść licznik występowania danego znaku
-def clearCharsCount():
+def clearCharsCountBook():
     for charData in charList:
-        charData.count = 0
+        charData.countBook = 0
 
 #Funkcja do wyszukiwania znaków i zwracania ich lokalizacji na stronie
 def searchForCaseSensitive(textBlocks, charToSearch):
@@ -165,7 +161,7 @@ def main():
         for bookPath in booksPaths:
             currentBookNumber += 1
             createBookDataset(bookPath)
-            clearCharsCount()
+            clearCharsCountBook()
 
         print("Finished")
     else:
