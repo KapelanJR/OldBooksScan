@@ -5,7 +5,7 @@ import fitz
 booksDirName = "books"
 datasetDirName = "datasets"
 datasetOutputName = "polish_lower_and_upper1"
-defaultCharBookLimit = 200
+defaultCharBookLimit = 100
 pageOffset = 12
 
 #Klasa posiadająca dane o danym znaku
