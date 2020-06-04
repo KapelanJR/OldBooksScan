@@ -168,7 +168,7 @@ def main():
 
     MakeSets(train_dir,test_dir,validation_dir,base_dir,charList)
 
-'''
+
 
     #Generatory zwracające wszystkie pliki z danego foldera i jego podfolderów
     #Podfolder jest traktowany jako odzielna etykeita
@@ -193,6 +193,7 @@ def main():
     )
 
 
+'''
     #Wczytanie modeku
     model = models.load_model("v1.h5")
 
@@ -208,11 +209,13 @@ def main():
             if(y == np.argmax(i)): 
                 print(x)
                 break
-
+'''
 
     #Architektura sieci
     model = models.Sequential()
     model.add(layers.Conv2D(128,(3,3),activation='relu',input_shape=(50,64,3)))
+    model.add(layers.MaxPool2D((2,2)))
+    model.add(layers.Conv2D(256,(3,3),activation='relu'))
     model.add(layers.MaxPool2D((2,2)))
     model.add(layers.Conv2D(512,(3,3),activation='relu'))
     model.add(layers.MaxPool2D((2,2)))
@@ -254,7 +257,7 @@ def main():
     plt.legend()
 
     plt.show()
-'''
+
 
 if __name__ == "__main__":
     main()
