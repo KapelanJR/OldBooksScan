@@ -47,10 +47,10 @@ charList = [
     charData('!', "0021"), charData('?', "003f"), charData(',', "002c"), charData('.', "002e"), charData('(', "0028"), charData(')', "0029"), charData(':', "003a"), charData('-', "002d"), 
     
     #Inne znaki rzadkie
-    charData('+', "002b", charBookLimit=1000), charData('=', "003d", charBookLimit=1000), charData('*', "002a", charBookLimit=1000), charData('/', "002f", charBookLimit=1000), charData(';', "003b", charBookLimit=1000),
+    charData('+', "002b", charBookLimit=1000), charData('=', "003d", charBookLimit=1000), charData('/', "002f", charBookLimit=1000), charData(';', "003b", charBookLimit=1000),
 
     #Inne znaki bardzo rzadkie
-    #charData('%', "0025"), charData('^', "005e"), charData('$', "0024"), charData('&', "0026"), charData('#', "0023"), charData('<', "003c"), charData('>', "003e"), charData('\\', "003e"), 
+    #charData('%', "0025"), charData('^', "005e"), charData('$', "0024"), charData('&', "0026"), charData('#', "0023"), charData('<', "003c"), charData('>', "003e"), charData('\\', "003e"), charData('*', "002a")
 
     #Inne znaki polskie
     charData('”', "201d"), charData('„', "201e"), 

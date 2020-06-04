@@ -45,7 +45,7 @@ def detectCorrectRotation(pixels):
 def cleanPixels(pixels):
     pixels = devideContrast(pixels)
     pixels = removeEdges(pixels)
-    pixels = detectCorrectRotation(pixels)
+    #pixels = detectCorrectRotation(pixels)
     
     return pixels
 
