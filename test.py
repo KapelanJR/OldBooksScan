@@ -149,8 +149,9 @@ def main():
     charData(' ', "0020"),
 
     ]
+
     #Ścieżki do folderów używanych przy trenowaniu, walidacji i testowaniu
-    base_dir = 'D:\\Progamowanie Python\\Uczenie Maszynowe\\datasetsGenerator\\datasets\\polish_1'
+    base_dir = 'C:\\Users\\Marcin\\Desktop\\Studia\\Projekt_PW\\Kod\\TFS\\datasetsGenerator\\datasets\\polish_1_fix'
 
     train_dir = os.path.join(base_dir,'train')
     if not os.path.exists(train_dir):
@@ -166,7 +167,7 @@ def main():
 
 
 
-    MakeSets(train_dir,test_dir,validation_dir,base_dir,charList)
+    #MakeSets(train_dir,test_dir,validation_dir,base_dir,charList)
 
 
 
@@ -174,34 +175,39 @@ def main():
     #Podfolder jest traktowany jako odzielna etykeita
     #Przeskalowane z 3 wymiarów (RGB) do 1 wymiaru 
     train_datagen = ImageDataGenerator(
-        rescale=1./270
+        rescale=1./295
     )
-    validation_datagen = ImageDataGenerator(rescale=1./270)
+    validation_datagen = ImageDataGenerator(rescale=1./295)
 
     test_datagen = ImageDataGenerator()
 
     train_generator = train_datagen.flow_from_directory(
-        train_dir,target_size=(50,64),batch_size=90,class_mode='categorical'
+        train_dir,target_size=(50,64),batch_size=180,class_mode='categorical'
     )
 
     validation_generator = validation_datagen.flow_from_directory(
-        validation_dir,target_size=(50,64),batch_size=90,class_mode='categorical'
+        validation_dir,target_size=(50,64),batch_size=180,class_mode='categorical'
     )
 
     test_generator = test_datagen.flow_from_directory(
-        test_dir,batch_size=1,class_mode='categorical',shuffle = False,target_size=(50,64)
+        test_dir,batch_size=1,class_mode='categorical',target_size=(50,64)
     )
 
 
-'''
+    '''
+    
     #Wczytanie modeku
-    model = models.load_model("v1.h5")
+    model = models.load_model("64_128_256_256__512_c290_e20-95,3.h5")
 
     #Odczytanie calkowitej liczby plikow testowych
     filenames = test_generator.filenames
     
     #Wygenerowanie przewidywań
-    pred = model.predict_generator(test_generator,steps = 20,verbose=1)
+    #pred = model.predict_generator(test_generator,steps = 20,verbose=1)
+    pred = model.evaluate_generator(test_generator,steps = 2000,verbose=1)
+    print(pred)
+
+    
 
     #Zamiana przewidywań na unicody
     for a, i in enumerate(pred):
@@ -209,28 +215,27 @@ def main():
             if(y == np.argmax(i)): 
                 print(x)
                 break
-'''
+    
+    '''
 
     #Architektura sieci
     model = models.Sequential()
-    model.add(layers.Conv2D(128,(3,3),activation='relu',input_shape=(50,64,3)))
+    model.add(layers.Conv2D(32,(3,3),activation='relu',input_shape=(50,64,3)))
     model.add(layers.MaxPool2D((2,2)))
-    model.add(layers.Conv2D(256,(3,3),activation='relu'))
-    model.add(layers.MaxPool2D((2,2)))
-    model.add(layers.Conv2D(512,(3,3),activation='relu'))
+    model.add(layers.Conv2D(64,(3,3),activation='relu'))
     model.add(layers.MaxPool2D((2,2)))
     model.add(layers.Flatten())
-    model.add(layers.Dense(512,activation='relu', kernel_regularizer=regularizers.l2(0.001)))
+    model.add(layers.Dense(256,activation='relu', kernel_regularizer=regularizers.l2(0.001)))
     model.add(layers.Dense(90,activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['acc'])
 
     history = model.fit_generator(
         train_generator,
-        steps_per_epoch=2000,
-        epochs=10,
+        steps_per_epoch=994,
+        epochs=40,
         validation_data=validation_generator,
-        validation_steps=504
+        validation_steps=194
     )
 
 
@@ -242,7 +247,7 @@ def main():
 
     epchos = range(len(acc))
 
-    model.save("128_512__512_c_270.h5")
+    model.save("32_64__256_c295_e40.h5")
 
     plt.plot(epchos,acc,'bo',label="Dokładność trenowania")
     plt.plot(epchos, val_acc,'b',label="Dokładność walidacji")
@@ -257,6 +262,7 @@ def main():
     plt.legend()
 
     plt.show()
+    
 
 
 if __name__ == "__main__":
