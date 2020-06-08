@@ -113,7 +113,7 @@ def generateCharDataset(charData, areas, page):
         if charData.countAll < charData.charAllLimit and charData.countBook < charData.charBookLimit:
             charData.countBook += 1
             charData.countAll += 1
-            img = page.getPixmap(matrix = fitz.Matrix(4, 4), clip = area.irect)
+            img = page.getPixmap(matrix = fitz.Matrix(8, 8), clip = area.irect)
             if not all(v == 0 for v in img.irect[:4]):
                 img.writeImage(dirPath + datasetDirName + "/" + datasetOutputName + "/" + charData.unicode + "_" + str(charData.countAll) + ".jpg")
             

@@ -5,9 +5,8 @@ import os
 import threading
 
 #Ustawienia folderów
-inputDirName = "test"
 outputDirName = "test"
-inputsDirName = "input"
+inputsDirName = "../input/jpg"
 outputsDirName = "output"
 
 #Ustawienia wykrywania, dane są podawane w procentach, 1 = 100%
@@ -236,26 +235,29 @@ def detectCharsInLines(textLines, pixels, orgPixels):
 
 def detectChars(pixels, opixels):
     textLines = detectTextLines(pixels)
+    if not textLines: return []
     chars = detectCharsInLines(textLines, pixels, opixels)
-    
     return chars
 
 def getChars(bookName, bookNum, page, pageNum):
-    img = Image.open(dirPath + "/" + inputsDirName + "/" + inputDirName + "/" + bookName + "/" + page).convert('L')
+    img = Image.open(dirPath + "/" + inputsDirName + "/" + bookName + "/" + page).convert('L')
     orgPixels = np.array(img, dtype="uint8")
     pixels, orgPixels = cleanPixels(orgPixels)
     chars = detectChars(pixels, orgPixels)
 
-    for line_i in range(len(chars)):
-        for word_i in range(len(chars[line_i][1])):
-            for char_i in range(len(chars[line_i][1][word_i])):
-                dirToSave = dirPath + "/" + outputsDirName + "/" + outputDirName + "/" + str(bookNum+1) + "/" + str(pageNum+1) + "/" + str(line_i+1) + "/" + str(word_i+1) + "/chars"
-                if not os.path.exists(dirToSave): os.makedirs(dirToSave)
-                charPixels = orgPixels[chars[line_i][0]][:, chars[line_i][1][word_i][char_i]]
-                Image.fromarray(charPixels).save(dirToSave + "/" + str(char_i+1) + ".jpg")
+    if chars:
+        for line_i in range(len(chars)):
+            for word_i in range(len(chars[line_i][1])):
+                for char_i in range(len(chars[line_i][1][word_i])):
+                    dirToSave = dirPath + "/" + outputsDirName + "/" + outputDirName + "/" + str(bookNum+1) + "/" + str(pageNum+1) + "/" + str(line_i+1) + "/" + str(word_i+1) + "/chars"
+                    if not os.path.exists(dirToSave): os.makedirs(dirToSave)
+                    charPixels = orgPixels[chars[line_i][0]][:, chars[line_i][1][word_i][char_i]]
+                    Image.fromarray(charPixels).save(dirToSave + "/" + str(char_i+1) + ".jpg")
+    
+    print("  Page " + str(pageNum+1) + " done" )
 
 def scanPages(bookName, bookNum):
-    pages = os.listdir(dirPath + "/" + inputsDirName + "/" + inputDirName + "/" + bookName)
+    pages = os.listdir(dirPath + "/" + inputsDirName + "/" + bookName)
 
     threads = []
     for page_i in range(len(pages)):
@@ -267,7 +269,7 @@ def scanPages(bookName, bookNum):
 
 
 def scanBooks():
-    booksNames = next(os.walk(dirPath + "/" + inputsDirName + "/" + inputDirName))[1]
+    booksNames = next(os.walk(dirPath + "/" + inputsDirName))[1]
     for book_i in range(len(booksNames)):
         print("Scanning book: " + booksNames[book_i])
         scanPages(booksNames[book_i], book_i)
