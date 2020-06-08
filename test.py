@@ -147,6 +147,7 @@ def main():
 
 
     ]
+
     #Ścieżki do folderów używanych przy trenowaniu, walidacji i testowaniu
     base_dir = 'D:\\Progamowanie Python\\Uczenie Maszynowe\\datasetsGenerator\\datasets'
 
