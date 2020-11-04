@@ -1,16 +1,17 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
-tensorflow = "*"
-keras = "*"
-scikit-learn = "*"
-scipy = "*"
+numpy = "*"
+tensorflow = "==1.5"
+sklearn = "*"
 mysql-connector-python = "*"
+keras = "==2.1.6"
+
+[dev-packages]
+pylint = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"

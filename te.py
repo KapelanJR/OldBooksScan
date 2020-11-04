@@ -23,5 +23,7 @@ def main():
     for x in mycursor:
         print(x)
 
+    
+
 if __name__ == "__main__":
     main()
