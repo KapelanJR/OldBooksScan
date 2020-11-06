@@ -5,3 +5,4 @@ datasetsGenerator/datasets/*
 charCutter/output/*
 input/jpg/*
 input/pdf/*
+.vscode
