@@ -1,1 +1,9 @@
 polish_1_hd/*
+datasetsGenerator/books/*
+!datasetsGenerator/books/.gitkeep 
+datasetsGenerator/datasets/*
+!datasetsGenerator/datasets/.gitkeep
+charCutter/output/*
+input/jpg/*
+input/pdf/*
+.vscode
