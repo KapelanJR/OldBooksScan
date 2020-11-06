@@ -1,190 +1,63 @@
-from keras import layers
-from keras import models
-from keras.preprocessing import image
+from keras_preprocessing.image import ImageDataGenerator
+from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D
+from keras import regularizers, optimizers
 import os,shutil
 import numpy as np
-from keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
-from keras import optimizers
-from keras import regularizers
-from sklearn.metrics import classification_report,confusion_matrix
-from keras.models import load_model
+import mysql.connector
+from keras_preprocessing.image import ImageDataGenerator
 import pandas as pd
+from keras.models import Sequential
+from keras import models
+from keras import layers
+from keras.models import load_model
 
-#Klasa posiadająca dane o danym znaku
-class charData:
-    def __init__(self, char, unicode):
-        self.char = char
-        self.unicode = unicode
-        self.count = 0
-
-
-def MakeSets(train_dir,test_dir,validation_dir,base_dir,charList):
-
-    for char in charList:
-        fnames = ['{}_{}.jpg'.format(char.unicode,i) for i in range(1,3001)]
-        for fname in fnames:
-            dst = os.path.join(base_dir,fname)
-            if(os.path.exists(dst)):
-                char.count +=1
-            else:
-                continue
-
-
-    #Kopiowoanie danej liczby zdjęć do poszczególnych folderów
-    current_index = 1
-    current_count = 0
-    for char in charList:
-        fnames = []
-        while(current_count < int((0.75*char.count))):
-            path = os.path.join(base_dir,'{}_{}.jpg'.format(char.unicode,current_index))
-            if(os.path.exists(path)):
-                fnames.append('{}_{}.jpg'.format(char.unicode,current_index))
-                current_count += 1
-            current_index += 1
-        current_count = 0
-        current_index = 1
-        for fname in fnames:
-            src = os.path.join(base_dir,fname)
-            dst = os.path.join(train_dir,char.unicode)
-            if not os.path.exists(dst):
-                os.mkdir(dst)
-            dst = os.path.join(dst,fname)
-            try:
-                shutil.copyfile(src,dst)
-            except Exception:
-                continue
-
-    current_index = 1
-    current_count = 0
-    for char in charList:
-        fnames = []
-        while(current_count < int((0.9*char.count))):
-            path = os.path.join(base_dir,'{}_{}.jpg'.format(char.unicode,current_index))
-            if(os.path.exists(path)):
-                current_count += 1
-                if(current_count > int((0.75*char.count))):
-                    fnames.append('{}_{}.jpg'.format(char.unicode,current_index))
-            current_index += 1
-        current_count = 0
-        current_index = 1
-        for fname in fnames:
-            src = os.path.join(base_dir,fname)
-            dst = os.path.join(validation_dir,char.unicode)
-            if not os.path.exists(dst):
-                os.mkdir(dst)
-            dst = os.path.join(dst,fname)
-            try:
-                shutil.copyfile(src,dst)
-            except Exception:
-                continue
-
-    current_index = 1
-    current_count = 0
-    for char in charList:
-        fnames = []
-        while(current_count < int((0.99*char.count))):
-            path = os.path.join(base_dir,'{}_{}.jpg'.format(char.unicode,current_index))
-            if(os.path.exists(path)):
-                current_count += 1
-                if(current_count > int((0.9*char.count))):
-                    fnames.append('{}_{}.jpg'.format(char.unicode,current_index))
-            current_index += 1
-        current_count = 0
-        current_index = 1
-        for fname in fnames:
-            src = os.path.join(base_dir,fname)
-            dst = os.path.join(test_dir,char.unicode)
-            if not os.path.exists(dst):
-                os.mkdir(dst)
-            dst = os.path.join(dst,fname)
-            try:
-                shutil.copyfile(src,dst)
-            except Exception:
-                continue
-
-        
+def append_ext(fn):
+    return fn+".jpg"
 
 def main():
-    #Lista znaków
-    charList = [
-
-    #Małe lietry
-    charData('a', "0061"), charData('b', "0062"), charData('c', "0063"), charData('d', "0064"), charData('e', "0065"), charData('f', "0066"), charData('g', "0067"), charData('h', "0068"), charData('i', "0069"), charData('j', "006a"), charData('k', "006b"), charData('l', "006c"), charData('m', "006d"), charData('n', "006e"), charData('o', "006f"), charData('p', "0070"), charData('r', "0072"), charData('s', "0073"), charData('t', "0074"), charData('u', "0075"), charData('w', "0077"), charData('y', "0079"), charData('z', "007a"), 
-
-    #Małe lietry polskie
-    charData('ą', "0105"), charData('ć', "0107"), charData('ę', "0119"), charData('ł', "0142"), charData('ń', "0144"), charData('ó', "00f3"), charData('ś', "015b"), charData('ź', "017a"), charData('ż', "017c"), 
-
-    #Małe litery angielskie 
-    #charData('q', "0071"), charData('v', "0076"), charData('x', "0078"),
-
-    #Duże litery
-    charData('A', "0041"), charData('B', "0042"), charData('C', "0043"), charData('D', "0044"), charData('E', "0045"), charData('F', "0046"), charData('G', "0047"), charData('H', "0048"), charData('I', "0049"), charData('J', "004a"), charData('K', "004b"), charData('L', "004c"), charData('M', "004d"), charData('N', "004e"), charData('O', "004f"), charData('P', "0050"), charData('R', "0052"), charData('S', "0053"), charData('T', "0054"), charData('U', "0055"), charData('W', "0057"), charData('Y', "0059"), charData('Z', "005a"), 
-
-    #Duże lietry polskie
-    charData('Ą', "0104"), charData('Ć', "0106"), charData('Ę', "0118"), charData('Ł', "0141"), charData('Ń', "0143"), charData('Ó', "00d3"), charData('Ś', "015a"), charData('Ź', "0179"), charData('Ż', "017b"), 
-
-    #Duże litery angielskie 
-    #charData('Q', "0051"), charData('V', "0056"), charData('X', "0058"),
-
-    #Liczby
-    charData('0', "0030"), charData('1', "0031"), charData('2', "0032"), charData('3', "0033"), charData('4', "0034"), charData('5', "0035"), charData('6', "0036"), charData('7', "0037"), charData('8', "0038"), charData('9', "0039"),
-
-    #Inne znaki 
-    charData('!', "0021"), charData('?', "003f"), charData(',', "002c"), charData('.', "002e"), charData('(', "0028"), charData(')', "0029"), charData(':', "003a"), charData('-', "002d"), 
-    
-    #Inne znaki rzadkie
-    charData('+', "002b"), charData('=', "003d"), charData('*', "002a"), charData('/', "002f"), charData(';', "003b"),
-
-    #Inne znaki bardzo rzadkie
-    #charData('%', "0025"), charData('^', "005e"), charData('$', "0024"), charData('&', "0026"), charData('#', "0023"), charData('<', "003c"), charData('>', "003e"), charData('\\', "003e"), 
-
-    #Inne znaki polskie
-    charData('”', "201d"), charData('„', "201e"), 
-
-    #Inne znaki angielskie
-    #charData('"', "0022"), charData('\'', "0027")
-
-
-    ]
-
-    #Ścieżki do folderów używanych przy trenowaniu, walidacji i testowaniu
-    base_dir = 'D:\\Progamowanie Python\\Uczenie Maszynowe\\datasetsGenerator\\datasets'
-
-    train_dir = os.path.join(base_dir,'train')
-    if not os.path.exists(train_dir):
-        os.mkdir(train_dir)
-
-    validation_dir = os.path.join(base_dir,'validation')
-    if not os.path.exists(validation_dir):
-        os.mkdir(validation_dir)
-
-    test_dir = os.path.join(base_dir,'test')
-    if not os.path.exists(test_dir):
-        os.mkdir(test_dir)
-
-
-
-    #MakeSets(train_dir,test_dir,validation_dir,base_dir,charList)
-
-
-
-    #Generatory zwracające wszystkie pliki z danego foldera i jego podfolderów
-    #Podfolder jest traktowany jako odzielna etykeita
-    #Przeskalowane z 3 wymiarów (RGB) do 1 wymiaru 
-    train_datagen = ImageDataGenerator(
-        rescale=1./255
-    )
-    validation_datagen = ImageDataGenerator(rescale=1./255)
-
-    train_generator = train_datagen.flow_from_directory(
-        train_dir,target_size=(20,32),batch_size=90,class_mode='categorical'
+    mydb = mysql.connector.connect(
+    host="10.8.0.1",
+    user="kacper",
+    password="5fUwXohpL6rh5xvK",
+    database="baza_do_nauki"
     )
 
-    validation_generator = validation_datagen.flow_from_directory(
-        validation_dir,target_size=(20,32),batch_size=90,class_mode='categorical'
+
+    mycursor = mydb.cursor()
+    mycursor.execute("SELECT sciezka FROM znaki")
+    images = mycursor.fetchall()
+
+
+    traindf = pd.read_csv("./TrainLabels.csv",dtype=str)
+
+    traindf["id"]=traindf["id"].apply(append_ext)
+    datagen=ImageDataGenerator(rescale=1./255,validation_split=0.25)
+
+
+    train_generator=datagen.flow_from_dataframe(
+        dataframe=traindf,
+        directory= "./TrainData",
+        x_col="id",
+        y_col="label",
+        subset="training",
+        batch_size=90,
+        shuffle=False,
+        class_mode="categorical",
+        target_size=(20,32)
     )
 
+        valid_generator=datagen.flow_from_dataframe(
+        dataframe=traindf,
+        directory= "./TrainData",
+        x_col="id",
+        y_col="label",
+        subset="valid",
+        batch_size=90,
+        shuffle=False,
+        class_mode="categorical",
+        target_size=(20,32)
+    )
 
     #Architektura sieci
     model = models.Sequential()
@@ -197,41 +70,34 @@ def main():
 
     model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['acc'])
 
+
+    STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
+    STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
+
     history = model.fit_generator(
-        train_generator,
-        steps_per_epoch=1900,
-        epochs=6,
-        validation_data=validation_generator,
-        validation_steps=504,
-        use_multiprocessing=False
+        generator=train_generator,
+        steps_per_epoch=STEP_SIZE_TRAIN,
+        validation_data=valid_generator,
+        validation_steps=STEP_SIZE_VALID,
+        epochs=6
     )
 
-
-    model.save("256__256_1024_6.h5")
-    '''
-    #Wykresiki
-    acc = history.history['acc']
-    val_acc = history.history['val_acc']
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
-
-    epchos = range(len(acc))
+    model.save("test.h5")
+    """
+    for i,image in enumerate(images):
+        with sftp.open(image[0]) as f:
+            file = f.read()
 
 
-    plt.plot(epchos,acc,'bo',label="Dokładność trenowania")
-    plt.plot(epchos, val_acc,'b',label="Dokładność walidacji")
-    plt.title('Dokładnośc trenownia i walidacji')
-    plt.legend()
 
-    plt.figure()
 
-    plt.plot(epchos,loss,'bo',label="Strata trenowania")
-    plt.plot(epchos, val_loss,'b',label="Strata walidacji")
-    plt.title('Strata trenowania i walidacji')
-    plt.legend()
+    with sftp.open("/var/lib/tfs/training/datasets/polish_1_hd/0075_351.jpg") as f:
+        img = cv2.imdecode(np.fromstring(f.read(), np.uint8), 1)
 
-    plt.show()
-'''
+    cv2.imshow("image", img)
+    cv2.waitKey(0)
+    """
+
 
 if __name__ == "__main__":
     main()

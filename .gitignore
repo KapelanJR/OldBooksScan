@@ -1,4 +1,0 @@
-datasetsGenerator/books/*
-!datasetsGenerator/books/.gitkeep 
-datasetsGenerator/datasets/*
-!datasetsGenerator/datasets/.gitkeep
