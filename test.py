@@ -16,8 +16,9 @@ def append_ext(fn):
     return fn+".jpg"
 
 def main():
+    '''
     mydb = mysql.connector.connect(
-    host="10.8.0.1",
+    host="192.168.1.250",
     user="kacper",
     password="5fUwXohpL6rh5xvK",
     database="baza_do_nauki"
@@ -27,6 +28,7 @@ def main():
     mycursor = mydb.cursor()
     mycursor.execute("SELECT sciezka FROM znaki")
     images = mycursor.fetchall()
+    '''
 
 
     traindf = pd.read_csv("./TrainLabels.csv",dtype=str)
@@ -37,7 +39,7 @@ def main():
 
     train_generator=datagen.flow_from_dataframe(
         dataframe=traindf,
-        directory= "./TrainData",
+        directory= "./datasetsGenerator/datasets/polish_1_hd",
         x_col="id",
         y_col="label",
         subset="training",
@@ -47,12 +49,12 @@ def main():
         target_size=(20,32)
     )
 
-        valid_generator=datagen.flow_from_dataframe(
+    valid_generator=datagen.flow_from_dataframe(
         dataframe=traindf,
-        directory= "./TrainData",
+        directory= "./datasetsGenerator/datasets/polish_1_hd",
         x_col="id",
         y_col="label",
-        subset="valid",
+        subset="validation",
         batch_size=90,
         shuffle=False,
         class_mode="categorical",
@@ -66,7 +68,7 @@ def main():
     model.add(layers.Flatten())
     model.add(layers.Dense(256,activation='relu'))
     model.add(layers.Dense(1024,activation='relu'))
-    model.add(layers.Dense(89,activation='softmax'))
+    model.add(layers.Dense(88,activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['acc'])
 
