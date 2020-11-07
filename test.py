@@ -66,7 +66,7 @@ def main():
     model.add(layers.Flatten())
     model.add(layers.Dense(256,activation='relu'))
     model.add(layers.Dense(1024,activation='relu'))
-    model.add(layers.Dense(89,activation='softmax'))
+    model.add(layers.Dense(88,activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['acc'])
 
@@ -83,20 +83,7 @@ def main():
     )
 
     model.save("test.h5")
-    """
-    for i,image in enumerate(images):
-        with sftp.open(image[0]) as f:
-            file = f.read()
 
-
-
-
-    with sftp.open("/var/lib/tfs/training/datasets/polish_1_hd/0075_351.jpg") as f:
-        img = cv2.imdecode(np.fromstring(f.read(), np.uint8), 1)
-
-    cv2.imshow("image", img)
-    cv2.waitKey(0)
-    """
 
 
 if __name__ == "__main__":
