@@ -12,20 +12,22 @@ from keras import models
 from keras import layers
 from keras.models import load_model
 
+def database_connection(host,user,password,database):
+    mydb = mysql.connector.connect(
+    host= host,
+    user= user,
+    password=password,
+    database=database
+    )
+    return mydb.cursor()
+
+
 def append_ext(fn):
     return fn+".jpg"
 
 def main():
     '''
-    mydb = mysql.connector.connect(
-    host="192.168.1.250",
-    user="kacper",
-    password="5fUwXohpL6rh5xvK",
-    database="baza_do_nauki"
-    )
-
-
-    mycursor = mydb.cursor()
+    mycursor = database_connection("192.168.1.250","kacper","5fUwXohpL6rh5xvK","baza_do_nauki")
     mycursor.execute("SELECT sciezka FROM znaki")
     images = mycursor.fetchall()
     '''
