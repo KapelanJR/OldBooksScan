@@ -12,6 +12,7 @@ keras = "==2.1.6"
 pandas = "*"
 keras-preprocessing = "*"
 pillow = "*"
+pylint = "*"
 
 [dev-packages]
 pylint = "*"
