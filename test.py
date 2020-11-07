@@ -85,20 +85,6 @@ def main():
     )
 
     model.save("test.h5")
-    """
-    for i,image in enumerate(images):
-        with sftp.open(image[0]) as f:
-            file = f.read()
-
-
-
-
-    with sftp.open("/var/lib/tfs/training/datasets/polish_1_hd/0075_351.jpg") as f:
-        img = cv2.imdecode(np.fromstring(f.read(), np.uint8), 1)
-
-    cv2.imshow("image", img)
-    cv2.waitKey(0)
-    """
 
 
 if __name__ == "__main__":
