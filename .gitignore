@@ -1,0 +1,8 @@
+datasetsGenerator/books/*
+!datasetsGenerator/books/.gitkeep 
+datasetsGenerator/datasets/*
+!datasetsGenerator/datasets/.gitkeep
+charCutter/output/*
+input/jpg/*
+input/pdf/*
+.vscode

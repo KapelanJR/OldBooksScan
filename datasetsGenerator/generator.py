@@ -4,7 +4,7 @@ import fitz
 #Ustawienia
 booksDirName = "books"
 datasetDirName = "datasets"
-datasetOutputName = "polish_1"
+datasetOutputName = "polish_1_hd"
 defaultCharAllLimit = 3000
 defaultCharBookLimit = 35
 pageOffset = 12
@@ -184,9 +184,6 @@ def main():
         print("Finished")
     else:
         print("No books found")
-
-    
-
 
 if __name__ == "__main__":
     main()

@@ -18,7 +18,11 @@ minTextLineHeight = 0.005 #Minimalna wysokość lini w procentach
 maxTextLineHeight = 0.06 #Maksymalna wysokość lini w procentach
 minCharWidth = 0.003 #Minimalna szerokość znaku
 maxCharWidth = 0.06 #Maksymalna szerokość znaku
+maxCharAvgColor = 0.5 #Ile maksymalnie procent znaku może być czarne
 minSpaceWidth = 0.008 #Minimalna szerokość spacji
+whiteColumnsToAdd = 0.002
+
+multithreadedScanning = False
 
 #Definicja ścieżki bezwzględnej
 dirPath = os.path.dirname(__file__)
@@ -115,7 +119,7 @@ def countWhitePixelsRows(pixels):
 def detectCorrectRotation(pixels, orgPixels):
     rowsMaxCount = countWhitePixelsRows(pixels)
     rowsMaxAngle = 0
-    for currentAngle in np.arange(-3, 3, 1/3):
+    for currentAngle in np.arange(-4, 4, 1/3):
         pixelsTest = ndimage.rotate(pixels, currentAngle, reshape=False, mode="constant", cval=1, prefilter=False)
         rowsCurrentCount = countWhitePixelsRows(pixelsTest)
         if rowsCurrentCount > rowsMaxCount:
@@ -136,7 +140,7 @@ def cleanPixels(orgPixels):
 
 def detectTextLines(pixels):
     imgHeight, _ = pixels.shape
-    textLines = []
+    textLines = [[]]
     textRows = np.where(np.any(pixels == 0, axis=1))
     lastRow = -1
     for row in textRows[0]:
@@ -180,15 +184,20 @@ def detectCharsInLines(textLines, pixels, orgPixels):
 
     '''
     imgHeight, imgWidth = pixels.shape
+    chars = []
 
     #Odnajdź lokalizacje prostokąta w którym znajduje się cały tekst
     crop1a = np.argmax(pixels == 0, axis=1)
+    if not np.any(crop1a): return chars
     crop1i = np.min(crop1a[np.nonzero(crop1a)])
     crop2a = np.argmax(np.flip(pixels, axis=1) == 0, axis=1)
+    if not np.any(crop2a): return chars
     crop2i = imgWidth - np.min(crop2a[np.nonzero(crop2a)])
     crop3a = np.argmax(pixels == 0, axis=0)
+    if not np.any(crop3a): return chars
     crop3i = np.min(crop3a[np.nonzero(crop3a)])
     crop4a = np.argmax(np.flip(pixels, axis=0) == 0, axis=0)
+    if not np.any(crop4a): return chars
     crop4i = imgHeight - np.min(crop4a[np.nonzero(crop4a)])
 
     #Wytnij odnaleziony prostokąt i wylicz dla niego próg kontrastu
@@ -197,7 +206,6 @@ def detectCharsInLines(textLines, pixels, orgPixels):
     cropOrgPixels = np.where(cropOrgPixels > np.average(cropOrgPixels[crop3i:crop4i, crop1i:crop2i]) - int(np.average(cropOrgPixels[crop3i:crop4i, crop1i:crop2i]) * 0.10), 1, 0)
 
     #Dla każdej linii wyszukaj kolumny pikseli z czarnymi pikselami, a następnie podziel je na wyrazy i znaki. Operuj na wyciętym wcześniej prostokącie.
-    chars = []
     for line in textLines:
         chars.append([line, []])
         charsInLine = [[[]]]
@@ -213,12 +221,15 @@ def detectCharsInLines(textLines, pixels, orgPixels):
             else: charsInLine.append([[column]])
             lastColumn = column
 
-        #Oczyść wynik z zbyt krótkich znaków i pustych wyrazów
+        #Oczyść wynik z zbyt krótkich znaków, zbyt długich znaków, zbyt ciemnych znaków i pustych wyrazów
         i = 0
         while i < len(charsInLine):
             j = 0
             while j < len(charsInLine[i]):
-                if len(charsInLine[i][j]) < int(imgWidth * minCharWidth) or len(charsInLine[i][j]) > int(imgWidth * maxCharWidth): del charsInLine[i][j]
+                charAvgColor = 0
+                charPixels = cropOrgPixels[line][:, charsInLine[i][j]]
+                if not charPixels.size == 0: charAvgColor = np.average(cropOrgPixels[line][:, charsInLine[i][j]])
+                if len(charsInLine[i][j]) < int(imgWidth * minCharWidth) or len(charsInLine[i][j]) > int(imgWidth * maxCharWidth) or charAvgColor < (1 - maxCharAvgColor): del charsInLine[i][j]
                 else: j += 1
             if len(charsInLine[i]) == 0: del charsInLine[i]
             else: i += 1
@@ -239,8 +250,31 @@ def detectChars(pixels, opixels):
     chars = detectCharsInLines(textLines, pixels, opixels)
     return chars
 
-def getChars(bookName, bookNum, page, pageNum):
-    img = Image.open(dirPath + "/" + inputsDirName + "/" + bookName + "/" + page).convert('L')
+def getCharPixels(orgPixels, chars, line_i, word_i, char_i):
+    _, imgWidth = orgPixels.shape
+    h = chars[line_i][0]
+    w = chars[line_i][1][word_i][char_i]
+    charPixels = orgPixels[h][:, w]
+
+    if imgWidth > 1000:
+        if chars[line_i][1][word_i][char_i][0] > 1:
+            columnToAddBeginning = orgPixels[h, w[0]-2].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((columnToAddBeginning, charPixels), axis=1)
+        if chars[line_i][1][word_i][char_i][-1] < imgWidth-2:
+            columnToAddEnd = orgPixels[h, w[-1]+2].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((charPixels, columnToAddEnd), axis=1)
+    else:
+        if chars[line_i][1][word_i][char_i][0] > 0:
+            columnToAddBeginning = orgPixels[h, w[0]-1].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((columnToAddBeginning, charPixels), axis=1)
+        if chars[line_i][1][word_i][char_i][-1] < imgWidth-1:
+            columnToAddEnd = orgPixels[h, w[-1]+1].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((charPixels, columnToAddEnd), axis=1)
+
+    return charPixels
+
+def getChars(bookName, bookNum, pageNum):
+    img = Image.open(dirPath + "/" + inputsDirName + "/" + bookName + "/" + str(pageNum+1) + ".jpg").convert('L')
     orgPixels = np.array(img, dtype="uint8")
     pixels, orgPixels = cleanPixels(orgPixels)
     chars = detectChars(pixels, orgPixels)
@@ -251,21 +285,24 @@ def getChars(bookName, bookNum, page, pageNum):
                 for char_i in range(len(chars[line_i][1][word_i])):
                     dirToSave = dirPath + "/" + outputsDirName + "/" + outputDirName + "/" + str(bookNum+1) + "/" + str(pageNum+1) + "/" + str(line_i+1) + "/" + str(word_i+1) + "/chars"
                     if not os.path.exists(dirToSave): os.makedirs(dirToSave)
-                    charPixels = orgPixels[chars[line_i][0]][:, chars[line_i][1][word_i][char_i]]
-                    Image.fromarray(charPixels).save(dirToSave + "/" + str(char_i+1) + ".jpg")
+                    charPixels = getCharPixels(orgPixels, chars, line_i, word_i, char_i)
+                    Image.fromarray(charPixels).save(dirToSave + "/" + str(char_i+11) + ".jpg")
     
     print("  Page " + str(pageNum+1) + " done" )
 
 def scanPages(bookName, bookNum):
     pages = os.listdir(dirPath + "/" + inputsDirName + "/" + bookName)
 
-    threads = []
-    for page_i in range(len(pages)):
-        t = threading.Thread(target=getChars, args=[bookName, bookNum, pages[page_i], page_i])
-        t.start()
-        threads.append(t)
-
-    for t in threads: t.join()
+    if multithreadedScanning:
+        threads = []
+        for page_i in range(len(pages)): 
+            t = threading.Thread(target=getChars, args=[bookName, bookNum, page_i])
+            threads.append(t)
+        for t in threads: t.start()
+        for t in threads: t.join()
+    else:
+        for page_i in range(len(pages)):
+            getChars(bookName, bookNum, page_i)
 
 
 def scanBooks():
