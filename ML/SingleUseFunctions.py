@@ -1,12 +1,39 @@
-from sklearn.metrics import classification_report,confusion_matrix
-from keras.models import load_model
-from keras import models
-from keras.preprocessing import image
-import os,shutil
-import numpy as np
-from keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
+import mysql.connector
+import os
 
+
+#Create CSV labels from paths
+#Path tuple
+def create_CSV(path,dst):
+    with open(dst,'w') as f:
+        f.write("id,label\n")
+        for i,fname in enumerate(path):
+            fil = fname[0]
+            fil = os.path.basename(os.path.normpath(fil))
+            f.write("{},{}\n".format(fil.replace('.jpg',''),fil[0:4]))
+
+
+def get_Data(images,sftp,dest):
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dest = os.path.join(dir_path,dest)
+    if not os.path.exists(dest):
+        os.mkdir(dest)
+    for image in images:
+        fname = os.path.basename(os.path.normpath(image[0]))
+        if not os.path.exists(os.path.join(dest,fname)):
+            sftp.get(image[0],os.path.join(dest,fname))
+
+
+#Function used to connect to database
+def database_connection(host,user,password,database):
+    mydb = mysql.connector.connect(
+    host= host,
+    user= user,
+    password=password,
+    database=database
+    )
+    return mydb.cursor()
 
 #Klasa posiadająca dane o danym znaku
 class charData:
@@ -14,6 +41,7 @@ class charData:
         self.char = char
         self.unicode = unicode
         self.count = 0
+
 
 charList = [
 
@@ -57,34 +85,3 @@ charList = [
     charData(' ', "0020"),
 
     ]
-
-
-test_dir = 'D:\\Progamowanie Python\\Uczenie Maszynowe\\datasetsGenerator\\datasets\\Etykiety'
-
-
-for char in charList:
-        path = os.path.join(test_dir,char.unicode)
-        os.mkdir(path)
-
-
-#tablica z przewiywanymi wartosciami
-li = []
-
-for a, i in enumerate(pred):
-    for x,y in test_generator.class_indices.items():
-        if(y == np.argmax(i)): 
-            li.append(x)
-            break
-
-#tablica z odwzorowaniem zakodowanych id na nasze unicody
-fi = []
-for x,y in test_generator.class_indices.items():
-    fi.append(x)
-
-#tablica z wartosciami jakie maja byc
-vi = []
-for x in test_generator.classes:
-    vi.append(fi[x])
-        
-
-print(classification_report(vi, li))
