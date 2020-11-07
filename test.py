@@ -89,6 +89,5 @@ def main():
     model.save("test.h5")
 
 
-
 if __name__ == "__main__":
     main()
