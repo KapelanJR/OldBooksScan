@@ -1,25 +1,18 @@
-from keras_preprocessing.image import ImageDataGenerator
-from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization
-from keras.layers import Conv2D, MaxPooling2D
-from keras import regularizers, optimizers
+import warnings  
+with warnings.catch_warnings():  
+    warnings.filterwarnings("ignore",category=FutureWarning)
+    from keras_preprocessing.image import ImageDataGenerator
+    from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization
+    from keras.layers import Conv2D, MaxPooling2D
+    from keras import regularizers, optimizers
+    import numpy as np
+    from keras.models import Sequential
+    from keras import models
+    from keras import layers
 import os,shutil
-import numpy as np
 import mysql.connector
-from keras_preprocessing.image import ImageDataGenerator
 import pandas as pd
-from keras.models import Sequential
-from keras import models
-from keras import layers
-from keras.models import load_model
-
-def database_connection(host,user,password,database):
-    mydb = mysql.connector.connect(
-    host= host,
-    user= user,
-    password=password,
-    database=database
-    )
-    return mydb.cursor()
+from SingleUseFunctions import create_CSV,database_connection
 
 
 def append_ext(fn):
@@ -32,8 +25,9 @@ def main():
     images = mycursor.fetchall()
     '''
 
-
-    traindf = pd.read_csv("./TrainLabels.csv",dtype=str)
+    #If u dont have CSV file with labales use create_CSV function
+    #and pass tupple of absolute paths to files
+    traindf = pd.read_csv("./ML//TrainLabels.csv",dtype=str)
 
     traindf["id"]=traindf["id"].apply(append_ext)
     datagen=ImageDataGenerator(rescale=1./255,validation_split=0.25)
@@ -63,7 +57,7 @@ def main():
         target_size=(20,32)
     )
 
-    #Architektura sieci
+    #Network architecture
     model = models.Sequential()
     model.add(layers.Conv2D(256,(3,3),activation='relu',input_shape=(20,32,3)))
     model.add(layers.MaxPool2D((2,2)))
