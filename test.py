@@ -12,21 +12,25 @@ from keras import models
 from keras import layers
 from keras.models import load_model
 
+def database_connection(host,user,password,database):
+    mydb = mysql.connector.connect(
+    host= host,
+    user= user,
+    password=password,
+    database=database
+    )
+    return mydb.cursor()
+
+
 def append_ext(fn):
     return fn+".jpg"
 
 def main():
-    mydb = mysql.connector.connect(
-    host="10.8.0.1",
-    user="kacper",
-    password="5fUwXohpL6rh5xvK",
-    database="baza_do_nauki"
-    )
-
-
-    mycursor = mydb.cursor()
+    '''
+    mycursor = database_connection("192.168.1.250","kacper","5fUwXohpL6rh5xvK","baza_do_nauki")
     mycursor.execute("SELECT sciezka FROM znaki")
     images = mycursor.fetchall()
+    '''
 
 
     traindf = pd.read_csv("./TrainLabels.csv",dtype=str)
@@ -37,7 +41,7 @@ def main():
 
     train_generator=datagen.flow_from_dataframe(
         dataframe=traindf,
-        directory= "./TrainData",
+        directory= "./datasetsGenerator/datasets/polish_1_hd",
         x_col="id",
         y_col="label",
         subset="training",
@@ -47,12 +51,12 @@ def main():
         target_size=(20,32)
     )
 
-        valid_generator=datagen.flow_from_dataframe(
+    valid_generator=datagen.flow_from_dataframe(
         dataframe=traindf,
-        directory= "./TrainData",
+        directory= "./datasetsGenerator/datasets/polish_1_hd",
         x_col="id",
         y_col="label",
-        subset="valid",
+        subset="validation",
         batch_size=90,
         shuffle=False,
         class_mode="categorical",

@@ -1,19 +1,21 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "==1.19.3"
+tensorflow = "==1.5"
+sklearn = "*"
+mysql-connector-python = "*"
+keras = "==2.1.6"
+pandas = "*"
+keras-preprocessing = "*"
+pillow = "*"
+pylint = "*"
 
 [dev-packages]
 pylint = "*"
 
-[packages]
-tensorflow = "*"
-keras = "*"
-scikit-learn = "*"
-scipy = "*"
-mysql-connector-python = "*"
-pandas = "*"
-pillow = "*"
-
 [requires]
-python_version = "3.7"
+python_version = "3.6"
