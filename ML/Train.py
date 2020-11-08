@@ -45,6 +45,7 @@ def main():
         target_size=(20,32)
     )
 
+
     valid_generator=datagen.flow_from_dataframe(
         dataframe=traindf,
         directory= "./datasetsGenerator/datasets/polish_1_hd",
@@ -57,6 +58,7 @@ def main():
         target_size=(20,32)
     )
 
+    
     #Network architecture
     model = models.Sequential()
     model.add(layers.Conv2D(256,(3,3),activation='relu',input_shape=(20,32,3)))
