@@ -12,17 +12,36 @@ import unicodedata
 import mysql.connector
 from SingleUseFunctions import charData,charList,database_connection
 import pandas as pd
+import cv2
 
 
 
 def main():
-    #mycursor = database_connection("192.168.1.250","kacper","5fUwXohpL6rh5xvK","baza_do_nauki")
+    #mycursor = database_connection("10.8.0.1","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
+    #mycursor.execute('SELECT sciezka,litera_id FROM litery')
+    #letters = mycursor.fetchall()
 
-    #Reading all labels from CSV file
-    labels = pd.read_csv("./ML//TrainLabels.csv",dtype=str)
-    labels = labels['label'].unique()
-    print(labels)
-    #model = models.load_model("(BEST)256__256_1024_6.h5")
+    #Reading labaels
+    chars = []
+    for char in charList:
+        chars.append(char.char)
+    chars = sorted(chars)
+
+    model = models.load_model("./ML//test.h5")
+
+    img = cv2.imread('./ML//5.png')
+    img = cv2.resize(img,(20,32))
+    img = np.reshape(img,[1,20,32,3])
+    pred = model.predict_classes(img)
+
+
+    print(chars[int(pred-1)])
+    
+    #for letter in letters:
+        #letter[1] sciezka letter[0] id
+        #wez zdjecie podaj do model.predict() i wynik zapisz w letter[0] w db
+
+    #mycursor.close()
 
 
 if __name__ == "__main__":
