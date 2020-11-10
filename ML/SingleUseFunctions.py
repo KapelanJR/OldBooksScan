@@ -1,16 +1,19 @@
 import mysql.connector
 import os
 
+def append_ext(fn):
+    return fn+".jpg"
+
 
 #Create CSV labels from paths
 #Path tuple
 def create_CSV(path,dst):
     with open(dst,'w') as f:
-        f.write("id,label")
+        f.write("id,label\n")
         for i,fname in enumerate(path):
-            fil = fname[0]
+            fil = fname
             fil = os.path.basename(os.path.normpath(fil))
-            f.write("{},{}".format(fil.replace('.jpg',''),fil[0:4]))
+            f.write("{},{}\n".format(fil.replace('.jpg',''),fil[0:4]))
 
 
 def get_Data(images,sftp,dest):
