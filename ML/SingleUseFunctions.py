@@ -1,6 +1,9 @@
 import mysql.connector
 import os
 
+def append_ext(fn):
+    return fn+".jpg"
+
 
 #Create CSV labels from paths
 #Path tuple
@@ -8,7 +11,7 @@ def create_CSV(path,dst):
     with open(dst,'w') as f:
         f.write("id,label\n")
         for i,fname in enumerate(path):
-            fil = fname[0]
+            fil = fname
             fil = os.path.basename(os.path.normpath(fil))
             f.write("{},{}\n".format(fil.replace('.jpg',''),fil[0:4]))
 
@@ -43,6 +46,7 @@ class charData:
         self.count = 0
 
 
+#Lista znaków
 charList = [
 
     #Małe lietry
@@ -70,18 +74,14 @@ charList = [
     charData('!', "0021"), charData('?', "003f"), charData(',', "002c"), charData('.', "002e"), charData('(', "0028"), charData(')', "0029"), charData(':', "003a"), charData('-', "002d"), 
     
     #Inne znaki rzadkie
-    charData('+', "002b"), charData('=', "003d"), charData('*', "002a"), charData('/', "002f"), charData(';', "003b"),
+    charData('+', "002b"), charData('=', "003d"), charData('/', "002f"), charData(';', "003b"),
 
     #Inne znaki bardzo rzadkie
-    #charData('%', "0025"), charData('^', "005e"), charData('$', "0024"), charData('&', "0026"), charData('#', "0023"), charData('<', "003c"), charData('>', "003e"), charData('\\', "003e"), 
+    #charData('%', "0025"), charData('^', "005e"), charData('$', "0024"), charData('&', "0026"), charData('#', "0023"), charData('<', "003c"), charData('>', "003e"), charData('\\', "003e"), charData('*', "002a")
 
     #Inne znaki polskie
     charData('”', "201d"), charData('„', "201e"), 
 
     #Inne znaki angielskie
     #charData('"', "0022"), charData('\'', "0027")
-
-    #Spacja
-    charData(' ', "0020"),
-
     ]
