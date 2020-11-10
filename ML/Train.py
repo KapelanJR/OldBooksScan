@@ -40,7 +40,7 @@ def main():
         y_col="label",
         subset="training",
         batch_size=90,
-        shuffle=False,
+        shuffle=True,
         class_mode="categorical",
         target_size=(20,32)
     )
@@ -53,7 +53,7 @@ def main():
         y_col="label",
         subset="validation",
         batch_size=90,
-        shuffle=False,
+        shuffle=True,
         class_mode="categorical",
         target_size=(20,32)
     )
@@ -82,6 +82,7 @@ def main():
         epochs=6
     )
 
+    print(history.history['accuracy'])
     model.save("test.h5")
 
 
