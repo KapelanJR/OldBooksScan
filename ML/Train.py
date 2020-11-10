@@ -56,7 +56,8 @@ def main():
         class_mode="categorical",
         target_size=(20,32)
     )
-
+    print(len(train_generator.class_indices.items()))
+    return
     #Network architecture
     model = models.Sequential()
     model.add(layers.Conv2D(256,(3,3),activation='relu',input_shape=(20,32,3)))
