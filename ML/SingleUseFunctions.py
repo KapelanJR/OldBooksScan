@@ -48,7 +48,6 @@ class charData:
 
 #Lista znaków
 charList = [
-
     #Małe lietry
     charData('a', "0061"), charData('b', "0062"), charData('c', "0063"), charData('d', "0064"), charData('e', "0065"), charData('f', "0066"), charData('g', "0067"), charData('h', "0068"), charData('i', "0069"), charData('j', "006a"), charData('k', "006b"), charData('l', "006c"), charData('m', "006d"), charData('n', "006e"), charData('o', "006f"), charData('p', "0070"), charData('r', "0072"), charData('s', "0073"), charData('t', "0074"), charData('u', "0075"), charData('w', "0077"), charData('y', "0079"), charData('z', "007a"), 
 
@@ -85,3 +84,88 @@ charList = [
     #Inne znaki angielskie
     #charData('"', "0022"), charData('\'', "0027")
     ]
+
+
+def MakeSets(train_dir,test_dir,validation_dir,base_dir,charList):
+
+    for char in charList:
+        fnames = ['{}_{}.jpg'.format(char.unicode,i) for i in range(1,3001)]
+        for fname in fnames:
+            dst = os.path.join(base_dir,fname)
+            if(os.path.exists(dst)):
+                char.count +=1
+            else:
+                continue
+
+
+    #Kopiowoanie danej liczby zdjęć do poszczególnych folderów
+    current_index = 1
+    current_count = 0
+    for char in charList:
+        fnames = []
+        while(current_count < int((0.75*char.count))):
+            path = os.path.join(base_dir,'{}_{}.jpg'.format(char.unicode,current_index))
+            if(os.path.exists(path)):
+                fnames.append('{}_{}.jpg'.format(char.unicode,current_index))
+                current_count += 1
+            current_index += 1
+        current_count = 0
+        current_index = 1
+        for fname in fnames:
+            src = os.path.join(base_dir,fname)
+            dst = os.path.join(train_dir,char.unicode)
+            if not os.path.exists(dst):
+                os.mkdir(dst)
+            dst = os.path.join(dst,fname)
+            try:
+                shutil.copyfile(src,dst)
+            except Exception:
+                continue
+
+    current_index = 1
+    current_count = 0
+    for char in charList:
+        fnames = []
+        while(current_count < int((0.9*char.count))):
+            path = os.path.join(base_dir,'{}_{}.jpg'.format(char.unicode,current_index))
+            if(os.path.exists(path)):
+                current_count += 1
+                if(current_count > int((0.75*char.count))):
+                    fnames.append('{}_{}.jpg'.format(char.unicode,current_index))
+            current_index += 1
+        current_count = 0
+        current_index = 1
+        for fname in fnames:
+            src = os.path.join(base_dir,fname)
+            dst = os.path.join(validation_dir,char.unicode)
+            if not os.path.exists(dst):
+                os.mkdir(dst)
+            dst = os.path.join(dst,fname)
+            try:
+                shutil.copyfile(src,dst)
+            except Exception:
+                continue
+
+    current_index = 1
+    current_count = 0
+    for char in charList:
+        fnames = []
+        while(current_count < int((0.99*char.count))):
+            path = os.path.join(base_dir,'{}_{}.jpg'.format(char.unicode,current_index))
+            if(os.path.exists(path)):
+                current_count += 1
+                if(current_count > int((0.9*char.count))):
+                    fnames.append('{}_{}.jpg'.format(char.unicode,current_index))
+            current_index += 1
+        current_count = 0
+        current_index = 1
+        for fname in fnames:
+            src = os.path.join(base_dir,fname)
+            dst = os.path.join(test_dir,char.unicode)
+            if not os.path.exists(dst):
+                os.mkdir(dst)
+            dst = os.path.join(dst,fname)
+            try:
+                shutil.copyfile(src,dst)
+            except Exception:
+                continue
