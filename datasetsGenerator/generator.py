@@ -3,9 +3,11 @@ import fitz
 
 #Ustawienia
 booksDirName = "books"
+booksGroupDirName = "add"
 datasetDirName = "datasets"
-datasetOutputName = "polish_1_hd"
-defaultCharAllLimit = 3000
+datasetOutputName = "polish_1_hd_add"
+defaultCharAllLimit = 150
+specialCharAllLimit = 75
 defaultCharBookLimit = 35
 pageOffset = 12
 
@@ -47,7 +49,7 @@ charList = [
     charData('!', "0021"), charData('?', "003f"), charData(',', "002c"), charData('.', "002e"), charData('(', "0028"), charData(')', "0029"), charData(':', "003a"), charData('-', "002d"), 
     
     #Inne znaki rzadkie
-    charData('+', "002b", charBookLimit=1000), charData('=', "003d", charBookLimit=1000), charData('/', "002f", charBookLimit=1000), charData(';', "003b", charBookLimit=1000),
+    charData('+', "002b", charBookLimit=specialCharAllLimit), charData('=', "003d", charBookLimit=specialCharAllLimit), charData('/', "002f", charBookLimit=specialCharAllLimit), charData(';', "003b", charBookLimit=specialCharAllLimit),
 
     #Inne znaki bardzo rzadkie
     #charData('%', "0025"), charData('^', "005e"), charData('$', "0024"), charData('&', "0026"), charData('#', "0023"), charData('<', "003c"), charData('>', "003e"), charData('\\', "003e"), charData('*', "002a")
@@ -59,7 +61,7 @@ charList = [
     #charData('"', "0022"), charData('\'', "0027")
 
     #Spacja
-    charData(' ', "0020"),
+    #charData(' ', "0020"),
 
     ]
 
@@ -75,7 +77,7 @@ currentPageNumber = 0
 
 #Pobierz ścieżki książek (pdf) i zapisz je w liście "booksPaths"
 def getBooksPaths():
-    booksDirPath = dirPath + booksDirName
+    booksDirPath = dirPath + booksDirName + "/" + booksGroupDirName
     booksPaths = []
 
     for bookName in os.listdir(booksDirPath):
