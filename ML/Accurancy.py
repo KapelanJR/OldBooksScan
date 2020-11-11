@@ -6,16 +6,22 @@ import os,shutil
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
-
+from SingleUseFunctions import *
 
 
 test_dir = 'D:\\Progamowanie Python\\Uczenie Maszynowe\\datasetsGenerator\\datasets\\Etykiety'
 
 
-for char in charList:
-        path = os.path.join(test_dir,char.unicode)
-        os.mkdir(path)
+test_datagen = ImageDataGenerator(
+    rescale=1./255
+)
 
+test_generator = test_datagen.flow_from_directory(
+    train_dir,target_size=(20,32),batch_size=44,class_mode='categorical'
+)
+
+model = models.load_model("")
+pred = model.predict_generator(generator,steps=test_generator.n//test_generator.batch_size)
 
 #tablica z przewiywanymi wartosciami
 li = []
