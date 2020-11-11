@@ -1,5 +1,6 @@
 import mysql.connector
 import os
+import shutil
 
 def append_ext(fn):
     return fn+".jpg"
@@ -86,7 +87,19 @@ charList = [
     ]
 
 
-def MakeSets(train_dir,test_dir,validation_dir,base_dir,charList):
+def MakeSets(train_dir,test_dir,validation_dir,base_dir):
+
+    train_dir = os.path.join(train_dir,'train')
+    if not os.path.exists(train_dir):
+        os.mkdir(train_dir)
+
+    validation_dir = os.path.join(validation_dir,'validation')
+    if not os.path.exists(validation_dir):
+        os.mkdir(validation_dir)
+
+    test_dir = os.path.join(test_dir,'test')
+    if not os.path.exists(test_dir):
+        os.mkdir(test_dir)
 
     for char in charList:
         fnames = ['{}_{}.jpg'.format(char.unicode,i) for i in range(1,3001)]

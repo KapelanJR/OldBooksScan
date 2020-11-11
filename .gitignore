@@ -8,3 +8,4 @@ input/pdf/*
 chars/*
 .vscode/
 ML/Old_*
+readyDatasets/*
