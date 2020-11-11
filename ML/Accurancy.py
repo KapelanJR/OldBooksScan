@@ -5,7 +5,6 @@ from keras.preprocessing import image
 import os,shutil
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
 
 
 
