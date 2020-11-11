@@ -7,7 +7,8 @@ with warnings.catch_warnings():
     from keras.preprocessing.image import ImageDataGenerator
     import numpy as np
 import os,shutil
-import json
+import numpy as np
+from keras.preprocessing.image import ImageDataGenerator
 
 
 test_dir = './polish_1_hd/test'
