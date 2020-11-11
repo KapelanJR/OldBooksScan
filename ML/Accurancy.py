@@ -14,7 +14,7 @@ from os.path import isfile, join
 
 
 #Directory with stored files
-dir = "./chars"
+dir = "./datasetsGenerator/datasets/polish_1_hd_add"
 
 files = [f for f in listdir(dir) if isfile(join(dir, f))]
 
@@ -24,7 +24,7 @@ traindf = pd.read_csv("./TrainLabels.csv",dtype=str)
 traindf["id"]=traindf["id"].apply(append_ext)
 datagen=ImageDataGenerator(rescale=1./255,validation_split=0)
 
-model = models.load_model("./ML/test.h5")
+model = models.load_model("./test_new.h5")
 
 test_generator=datagen.flow_from_dataframe(
     dataframe=traindf,

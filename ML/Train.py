@@ -19,9 +19,7 @@ import pandas as pd
     )
     validation_datagen = ImageDataGenerator(rescale=1./255)
 
-    train_generator = train_datagen.flow_from_directory(
-        train_dir,target_size=(20,32),batch_size=90,class_mode='categorical'
-    )
+    print(train_generator.class_indices.items())
 
     validation_generator = validation_datagen.flow_from_directory(
         validation_dir,target_size=(20,32),batch_size=90,class_mode='categorical'
@@ -47,6 +45,7 @@ import pandas as pd
         validation_steps=504,
         use_multiprocessing=False
     )
+
 
 
     model.save("256__256_1024_6.h5")
