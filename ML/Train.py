@@ -45,6 +45,7 @@ def main():
         target_size=(20,32)
     )
 
+    print(train_generator.class_indices.items())
 
     valid_generator=datagen.flow_from_dataframe(
         dataframe=traindf,
@@ -82,7 +83,7 @@ def main():
         epochs=6
     )
 
-    print(history.history['accuracy'])
+    #print(history.history['accuracy'])
     model.save("test.h5")
 
 
