@@ -85,7 +85,7 @@ charList = [
     #charData('"', "0022"), charData('\'', "0027")
     ]
 
-
+#base_dir - folder with data
 def MakeSets(train_dir,test_dir,validation_dir,base_dir,charList):
 
     for char in charList:
