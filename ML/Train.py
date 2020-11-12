@@ -11,6 +11,11 @@ with warnings.catch_warnings():
     from sklearn.metrics import classification_report,confusion_matrix
     from keras.models import load_model
 import pandas as pd
+
+def main():
+
+    train_dir = "./readyDatasets/polish_1_hd/train"
+    validation_dir = "./readyDatasets/polish_1_hd/validation"
     
 
 train_dir = "polish_1_hd/train"
