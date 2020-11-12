@@ -5,23 +5,20 @@ from keras.preprocessing import image
 import os,shutil
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
 from SingleUseFunctions import *
 
-
-test_dir = 'D:\\Progamowanie Python\\Uczenie Maszynowe\\datasetsGenerator\\datasets\\Etykiety'
-
+test_dir = "./readyDatasets/polish_1_hd/test"
 
 test_datagen = ImageDataGenerator(
     rescale=1./255
 )
 
 test_generator = test_datagen.flow_from_directory(
-    train_dir,target_size=(20,32),batch_size=44,class_mode='categorical'
+    test_dir,target_size=(20,32),batch_size=71,class_mode='categorical'
 )
 
-model = models.load_model("")
-pred = model.predict_generator(generator,steps=test_generator.n//test_generator.batch_size)
+model = models.load_model("./test_new.h5")
+pred = model.predict_generator(test_generator,steps=test_generator.n//test_generator.batch_size)
 
 #tablica z przewiywanymi wartosciami
 li = []
@@ -42,5 +39,4 @@ vi = []
 for x in test_generator.classes:
     vi.append(fi[x])
         
-
 print(classification_report(vi, li))
