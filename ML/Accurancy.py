@@ -1,15 +1,16 @@
-from sklearn.metrics import classification_report,confusion_matrix
-from keras.models import load_model
-from keras import models
-from keras.preprocessing import image
+import warnings  
+with warnings.catch_warnings():  
+    from sklearn.metrics import classification_report,confusion_matrix
+    from keras.models import load_model
+    from keras import models
+    from keras.preprocessing import image
+    from keras.preprocessing.image import ImageDataGenerator
+    import numpy as np
 import os,shutil
-import numpy as np
-from keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
-from SingleUseFunctions import *
+import json
 
 
-test_dir = 'D:\\Progamowanie Python\\Uczenie Maszynowe\\datasetsGenerator\\datasets\\Etykiety'
+test_dir = './polish_1_hd/test'
 
 
 test_datagen = ImageDataGenerator(
@@ -17,30 +18,17 @@ test_datagen = ImageDataGenerator(
 )
 
 test_generator = test_datagen.flow_from_directory(
-    train_dir,target_size=(20,32),batch_size=44,class_mode='categorical'
-)
+    test_dir,target_size=(20,32),batch_size=2,class_mode='categorical',shuffle=False)
 
-model = models.load_model("")
-pred = model.predict_generator(generator,steps=test_generator.n//test_generator.batch_size)
+model = models.load_model("./test.h5")
+#scores = model.evaluate_generator(test_generator,10000)
+pred = model.predict_generator(test_generator,steps=2)
 
-#tablica z przewiywanymi wartosciami
-li = []
 
-for a, i in enumerate(pred):
-    for x,y in test_generator.class_indices.items():
-        if(y == np.argmax(i)): 
-            li.append(x)
-            break
+# Zamiana kluczy z wartościani wynik {indeks:unicode litery}
+inv_map = {v: k for k, v in test_generator.class_indices.items()}
+with open('./labels.txt', 'w') as file:
+    json.dump(inv_map, file)
 
-#tablica z odwzorowaniem zakodowanych id na nasze unicody
-fi = []
-for x,y in test_generator.class_indices.items():
-    fi.append(x)
-
-#tablica z wartosciami jakie maja byc
-vi = []
-for x in test_generator.classes:
-    vi.append(fi[x])
-        
-
-print(classification_report(vi, li))
+for i in pred:
+    print(inv_map[np.argmax(i)])
