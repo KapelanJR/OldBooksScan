@@ -169,3 +169,10 @@ def MakeSets(train_dir,test_dir,validation_dir,base_dir,charList):
                 shutil.copyfile(src,dst)
             except Exception:
                 continue
+
+# Zamiana kluczy z wartościani wynik {indeks:unicode litery}
+def inverse_dict(dict):
+    # Zamiana kluczy z wartościani wynik {indeks:unicode litery}
+    inv_map = {v: k for k, v in dict.class_indices.items()}
+    return inv_map
+

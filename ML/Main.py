@@ -3,16 +3,23 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=FutureWarning)
     from keras.models import load_model
     from keras import models
-    from keras.preprocessing import image
     import numpy as np
-    from keras.preprocessing.image import ImageDataGenerator
-    from sklearn.metrics import classification_report,confusion_matrix
+    from keras.preprocessing.image import load_img,img_to_array
 import os,shutil
 import unicodedata
 import mysql.connector
 from SingleUseFunctions import charData,charList,database_connection
 import pandas as pd
-import cv2
+import json
+
+def pred_img(model,path,labels):
+    img = load_img(path=path,target_size=(20,32))
+    input_arr = img_to_array(img)
+    input_arr = np.array([input_arr])
+    pred = model.predict(input_arr)
+    #Pobranie litery z najwiekszym prawdopodobienstwem
+    for i in pred:
+        return labels[str(np.argmax(i))]
 
 
 
@@ -21,21 +28,14 @@ def main():
     #mycursor.execute('SELECT sciezka,litera_id FROM litery')
     #letters = mycursor.fetchall()
 
-    #Reading labaels
-    chars = []
-    for char in charList:
-        chars.append(char.char)
-    chars = sorted(chars)
+    model = models.load_model("./test.h5")
 
-    model = models.load_model("./ML//test.h5")
-
-    img = cv2.imread('./ML//5.png')
-    img = cv2.resize(img,(20,32))
-    img = np.reshape(img,[1,20,32,3])
-    pred = model.predict_classes(img)
-
-
-    print(chars[int(pred-1)])
+    #Pobranie etykiet z pliku
+    labels = {}
+    with open('./labels.txt', 'r') as file:
+        labels = json.load(file)
+    path = "./polish_1_hd/test/00d3/00d3_1083.jpg"
+    print(pred_img(model,path,labels))
     
     #for letter in letters:
         #letter[1] sciezka letter[0] id
