@@ -18,17 +18,10 @@ test_datagen = ImageDataGenerator(
 )
 
 test_generator = test_datagen.flow_from_directory(
-    test_dir,target_size=(20,32),batch_size=71,class_mode='categorical'
-)
-
-model = models.load_model("./test_new.h5")
-pred = model.predict_generator(test_generator,steps=test_generator.n//test_generator.batch_size)
-
-#tablica z przewiywanymi wartosciami
-li = []
+    test_dir,target_size=(20,32),batch_size=10000,class_mode='categorical',shuffle=True)
 
 model = models.load_model("./test.h5")
-#scores = model.evaluate_generator(test_generator,10000)
+scores = model.evaluate_generator(test_generator,10000)
 pred = model.predict_generator(test_generator,steps=2)
 
 

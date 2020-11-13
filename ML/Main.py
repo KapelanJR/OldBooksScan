@@ -34,11 +34,11 @@ def main():
     mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL LIMIT 100')
     letters = mycursor.fetchall()
 
-    model = models.load_model("./test_new.h5")
+    model = models.load_model("./ML/test_new.h5")
 
     #Loading labels from file
     labels = {}
-    with open('./labels.txt', 'r') as file:
+    with open('./ML/labels.txt', 'r') as file:
         labels = json.load(file)
 
     #Predict all images in db
