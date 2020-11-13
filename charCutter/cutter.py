@@ -3,11 +3,14 @@ import numpy as np
 from scipy import ndimage
 import os
 import threading
+import sys
+import mysql.connector
+import fitz
 
 #Ustawienia folderów
-outputDirName = "test"
-inputsDirName = "../input/jpg"
-outputsDirName = "output"
+inputsDirName = "/var/lib/tfs/PDFs_pages"
+outputsDirName = "/var/lib/tfs/PDFs_letters"
+PDFFileDirName = "/var/lib/tfs/PDFs_toScan"
 
 #Ustawienia wykrywania, dane są podawane w procentach, 1 = 100%
 contrastDivThreshold = "auto" #Dzielnik kontrastu, "auto" - jeśli ma być automatyczny
@@ -18,10 +21,14 @@ minTextLineHeight = 0.005 #Minimalna wysokość lini w procentach
 maxTextLineHeight = 0.06 #Maksymalna wysokość lini w procentach
 minCharWidth = 0.003 #Minimalna szerokość znaku
 maxCharWidth = 0.06 #Maksymalna szerokość znaku
+maxCharAvgColor = 0.5 #Ile maksymalnie procent znaku może być czarne
 minSpaceWidth = 0.008 #Minimalna szerokość spacji
+whiteColumnsToAdd = 0.002 #Liczba białych kolumn do dodania pomiędzy znakami w procentach 
 
-#Definicja ścieżki bezwzględnej
-dirPath = os.path.dirname(__file__)
+multithreadedScanning = True
+maxThreadCount = 10 #Maksymalna liczba jednocześnie działających wątków
+
+showPrints = True
 
 def devideContrast(pixels):
     imgHeight, imgWidth = pixels.shape
@@ -115,7 +122,7 @@ def countWhitePixelsRows(pixels):
 def detectCorrectRotation(pixels, orgPixels):
     rowsMaxCount = countWhitePixelsRows(pixels)
     rowsMaxAngle = 0
-    for currentAngle in np.arange(-3, 3, 1/3):
+    for currentAngle in np.arange(-4, 4, 1/3):
         pixelsTest = ndimage.rotate(pixels, currentAngle, reshape=False, mode="constant", cval=1, prefilter=False)
         rowsCurrentCount = countWhitePixelsRows(pixelsTest)
         if rowsCurrentCount > rowsMaxCount:
@@ -136,7 +143,7 @@ def cleanPixels(orgPixels):
 
 def detectTextLines(pixels):
     imgHeight, _ = pixels.shape
-    textLines = []
+    textLines = [[]]
     textRows = np.where(np.any(pixels == 0, axis=1))
     lastRow = -1
     for row in textRows[0]:
@@ -148,7 +155,6 @@ def detectTextLines(pixels):
     while i < len(textLines):
         if len(textLines[i]) < int(imgHeight * minTextLineHeight) or len(textLines[i]) > int(imgHeight * maxTextLineHeight): del textLines[i] 
         else: i += 1
-
 
     return textLines
 
@@ -180,15 +186,20 @@ def detectCharsInLines(textLines, pixels, orgPixels):
 
     '''
     imgHeight, imgWidth = pixels.shape
+    chars = []
 
     #Odnajdź lokalizacje prostokąta w którym znajduje się cały tekst
     crop1a = np.argmax(pixels == 0, axis=1)
+    if not np.any(crop1a): return chars
     crop1i = np.min(crop1a[np.nonzero(crop1a)])
     crop2a = np.argmax(np.flip(pixels, axis=1) == 0, axis=1)
+    if not np.any(crop2a): return chars
     crop2i = imgWidth - np.min(crop2a[np.nonzero(crop2a)])
     crop3a = np.argmax(pixels == 0, axis=0)
+    if not np.any(crop3a): return chars
     crop3i = np.min(crop3a[np.nonzero(crop3a)])
     crop4a = np.argmax(np.flip(pixels, axis=0) == 0, axis=0)
+    if not np.any(crop4a): return chars
     crop4i = imgHeight - np.min(crop4a[np.nonzero(crop4a)])
 
     #Wytnij odnaleziony prostokąt i wylicz dla niego próg kontrastu
@@ -197,7 +208,6 @@ def detectCharsInLines(textLines, pixels, orgPixels):
     cropOrgPixels = np.where(cropOrgPixels > np.average(cropOrgPixels[crop3i:crop4i, crop1i:crop2i]) - int(np.average(cropOrgPixels[crop3i:crop4i, crop1i:crop2i]) * 0.10), 1, 0)
 
     #Dla każdej linii wyszukaj kolumny pikseli z czarnymi pikselami, a następnie podziel je na wyrazy i znaki. Operuj na wyciętym wcześniej prostokącie.
-    chars = []
     for line in textLines:
         chars.append([line, []])
         charsInLine = [[[]]]
@@ -213,12 +223,15 @@ def detectCharsInLines(textLines, pixels, orgPixels):
             else: charsInLine.append([[column]])
             lastColumn = column
 
-        #Oczyść wynik z zbyt krótkich znaków i pustych wyrazów
+        #Oczyść wynik z zbyt krótkich znaków, zbyt długich znaków, zbyt ciemnych znaków i pustych wyrazów
         i = 0
         while i < len(charsInLine):
             j = 0
             while j < len(charsInLine[i]):
-                if len(charsInLine[i][j]) < int(imgWidth * minCharWidth) or len(charsInLine[i][j]) > int(imgWidth * maxCharWidth): del charsInLine[i][j]
+                charAvgColor = 0
+                charPixels = cropOrgPixels[line][:, charsInLine[i][j]]
+                if not charPixels.size == 0: charAvgColor = np.average(cropOrgPixels[line][:, charsInLine[i][j]])
+                if len(charsInLine[i][j]) < int(imgWidth * minCharWidth) or len(charsInLine[i][j]) > int(imgWidth * maxCharWidth) or charAvgColor < (1 - maxCharAvgColor): del charsInLine[i][j]
                 else: j += 1
             if len(charsInLine[i]) == 0: del charsInLine[i]
             else: i += 1
@@ -239,44 +252,109 @@ def detectChars(pixels, opixels):
     chars = detectCharsInLines(textLines, pixels, opixels)
     return chars
 
-def getChars(bookName, bookNum, page, pageNum):
-    img = Image.open(dirPath + "/" + inputsDirName + "/" + bookName + "/" + page).convert('L')
+def getCharPixels(orgPixels, chars, line_i, word_i, char_i):
+    _, imgWidth = orgPixels.shape
+    h = chars[line_i][0]
+    w = chars[line_i][1][word_i][char_i]
+    charPixels = orgPixels[h][:, w]
+
+    if imgWidth > 1000:
+        if chars[line_i][1][word_i][char_i][0] > 1:
+            columnToAddBeginning = orgPixels[h, w[0]-2].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((columnToAddBeginning, charPixels), axis=1)
+        if chars[line_i][1][word_i][char_i][-1] < imgWidth-2:
+            columnToAddEnd = orgPixels[h, w[-1]+2].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((charPixels, columnToAddEnd), axis=1)
+    else:
+        if chars[line_i][1][word_i][char_i][0] > 0:
+            columnToAddBeginning = orgPixels[h, w[0]-1].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((columnToAddBeginning, charPixels), axis=1)
+        if chars[line_i][1][word_i][char_i][-1] < imgWidth-1:
+            columnToAddEnd = orgPixels[h, w[-1]+1].reshape(-1, 1)
+            for _ in range(0, int(whiteColumnsToAdd * imgWidth)): charPixels = np.concatenate((charPixels, columnToAddEnd), axis=1)
+
+    return charPixels
+
+def getChars(bookName, bookID, page, pageNum):
+    img = Image.open(inputsDirName + "/" + bookName + "/" + page).convert('L')
     orgPixels = np.array(img, dtype="uint8")
     pixels, orgPixels = cleanPixels(orgPixels)
     chars = detectChars(pixels, orgPixels)
 
+    db = mysql.connector.connect(host="localhost", user="tfs", password="3sHUCwk3)%$%?Q5U", database="baza_wynikowa")
+    cur = db.cursor()
+
+    cur.execute("INSERT INTO strony (ksiazka_id, numer_strony, sciezka) VALUES (%s, %s, %s)", (bookID, os.path.splitext(page)[0], inputsDirName + "/" + bookName + "/" + page))
+    db.commit()
+    cur.execute("SELECT LAST_INSERT_ID()")
+    pageID = int(cur.fetchone()[0])
+
     if chars:
         for line_i in range(len(chars)):
+            cur.execute("INSERT INTO linie (strona_id, numer_linii) VALUES (%s, %s)", (pageID, line_i+1))
+            db.commit()
+            cur.execute("SELECT LAST_INSERT_ID()")
+            lineID = int(cur.fetchone()[0])
             for word_i in range(len(chars[line_i][1])):
+                cur.execute("INSERT INTO wyrazy (linia_id, numer_wyrazu) VALUES (%s, %s)", (lineID, word_i+1))
+                db.commit()
+                cur.execute("SELECT LAST_INSERT_ID()")
+                wordID = int(cur.fetchone()[0])
                 for char_i in range(len(chars[line_i][1][word_i])):
-                    dirToSave = dirPath + "/" + outputsDirName + "/" + outputDirName + "/" + str(bookNum+1) + "/" + str(pageNum+1) + "/" + str(line_i+1) + "/" + str(word_i+1) + "/chars"
+                    dirToSave = outputsDirName + "/" + str(bookID) + "/" + str(pageNum+1) + "/" + str(line_i+1) + "/" + str(word_i+1)
                     if not os.path.exists(dirToSave): os.makedirs(dirToSave)
-                    charPixels = orgPixels[chars[line_i][0]][:, chars[line_i][1][word_i][char_i]]
-                    Image.fromarray(charPixels).save(dirToSave + "/" + str(char_i+1) + ".jpg")
+                    charPixels = getCharPixels(orgPixels, chars, line_i, word_i, char_i)
+                    imagePath = dirToSave + "/" + str(char_i+1) + ".jpg"
+                    Image.fromarray(charPixels).save(imagePath)
+                    imgXPos = int(chars[line_i][1][word_i][char_i][-1])
+                    imgYPos = int(chars[line_i][0][0])
+                    cur.execute("INSERT INTO litery (wyraz_id, numer_litery, pozycjaX, pozycjaY, sciezka) VALUES (%s, %s, %s, %s, %s)", (wordID, char_i+1, imgXPos, imgYPos, imagePath))
+                    db.commit()
+
+    db.close()
+    if showPrints: print("  Page " + str(pageNum+1) + " done" )
+
+def scanPages(bookName, bookID):
+    pages = os.listdir(inputsDirName + "/" + bookName)
+
+    if multithreadedScanning:
+        for i in range(0, len(pages), maxThreadCount):
+            threads = []
+            tc = maxThreadCount
+            if len(pages[i:]) < 10: tc = len(pages[i:])
+
+            for page_i in range(i, i+tc):
+                t = threading.Thread(target = getChars, args = [bookName, bookID, pages[page_i], page_i])
+                threads.append(t)
+
+            for t in threads: t.start()
+            for t in threads: t.join()
+    else:
+        for page_i in range(len(pages)): getChars(bookName, bookID, pages[page_i], page_i)
+
+def convertPDFPagesToJPG(bookName, bookID):
+    book = fitz.open(PDFFileDirName + "/" + bookName + ".pdf")
+    dirToSave = inputsDirName + "/" + bookName
+    if not os.path.exists(dirToSave): os.makedirs(dirToSave)
+    for page in book: page.getPixmap(matrix=fitz.Matrix(8, 8)).writeImage(dirToSave + "/" + str(page.number) + ".jpg")
+    if showPrints: print("Converting PDF pages to JPG pages done")
+
+def main(bookName):
+    db = mysql.connector.connect(host="localhost", user="tfs", password="3sHUCwk3)%$%?Q5U", database="baza_wynikowa")
+    cur = db.cursor()
+
+    bookName = os.path.splitext(bookName)[0]
+
+    cur.execute("INSERT INTO ksiazki (nazwa, sciezka) VALUES (%s, %s)", (bookName, PDFFileDirName + "/" + bookName + ".pdf"))
+    db.commit()
+    cur.execute("SELECT LAST_INSERT_ID()")
+    bookID = int(cur.fetchone()[0])
+    db.close()
+
+    convertPDFPagesToJPG(bookName, bookID)
+    scanPages(bookName, bookID)
     
-    print("  Page " + str(pageNum+1) + " done" )
-
-def scanPages(bookName, bookNum):
-    pages = os.listdir(dirPath + "/" + inputsDirName + "/" + bookName)
-
-    threads = []
-    for page_i in range(len(pages)):
-        t = threading.Thread(target=getChars, args=[bookName, bookNum, pages[page_i], page_i])
-        t.start()
-        threads.append(t)
-
-    for t in threads: t.join()
-
-
-def scanBooks():
-    booksNames = next(os.walk(dirPath + "/" + inputsDirName))[1]
-    for book_i in range(len(booksNames)):
-        print("Scanning book: " + booksNames[book_i])
-        scanPages(booksNames[book_i], book_i)
-
-def main():
-    scanBooks()
-    print("Finished")
+    if showPrints: print("Finished")
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])

@@ -9,6 +9,8 @@ tensorflow = "==1.5"
 sklearn = "*"
 mysql-connector-python = "*"
 keras = "==2.1.6"
+pymupdf = "*"
+pillow = "*"
 
 [dev-packages]
 pylint = "*"

@@ -1,9 +1,6 @@
-1. Pobieramy i instalujemy CUDE 
-https://www.tensorflow.org/install/gpu
-2. Pobieramy miniconde
-https://docs.conda.io/en/latest/miniconda.html
-3. Tworzymy VENV
-conda env create -v -f 1.yml
-4. Aktywujemy VENV
-conda activate tensorflow
-GOTOWE
+1. On server:
+sudo apt-get python3.7
+sudo apt-get install python3-pip
+sudo python3 pip install pipenv
+pipenv shell
+pipenv sync
