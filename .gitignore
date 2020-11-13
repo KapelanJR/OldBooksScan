@@ -1,4 +1,3 @@
-polish_1_hd/*
 datasetsGenerator/books/*
 !datasetsGenerator/books/.gitkeep 
 datasetsGenerator/datasets/*
@@ -7,3 +6,4 @@ charCutter/output/*
 input/jpg/*
 input/pdf/*
 .vscode/
+polish_1_hd/*
