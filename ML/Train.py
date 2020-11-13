@@ -51,7 +51,7 @@ model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['acc'
 history = model.fit_generator(
     train_generator,
     steps_per_epoch=1900,
-    epochs=4,
+    epochs=6,
     validation_data=validation_generator,
     validation_steps=504,
 )

@@ -9,9 +9,9 @@ import os,shutil
 import unicodedata
 import mysql.connector
 from SingleUseFunctions import charData,charList,database_connection
-import pandas as pd
 import json
 
+# model = trained keras model ||  path = path to image || labels = file with all possible labels
 def pred_img(model,path,labels):
     img = load_img(path=path,target_size=(20,32))
     input_arr = img_to_array(img)
@@ -21,27 +21,34 @@ def pred_img(model,path,labels):
     for i in pred:
         return labels[str(np.argmax(i))]
 
-
+def uni_to_char(unicode):
+    for uni in charList:
+        if (uni.unicode == unicode):
+            return uni.char
 
 def main():
-    #mycursor = database_connection("10.8.0.1","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
-    #mycursor.execute('SELECT sciezka,litera_id FROM litery')
-    #letters = mycursor.fetchall()
+    sql_update = "UPDATE litery SET predykcja = %s WHERE id = %s"
+    db = database_connection("10.8.0.1","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
+    mycursor = db.cursor()
+    #Getting all letters to predict
+    mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL LIMIT 100')
+    letters = mycursor.fetchall()
 
-    model = models.load_model("./test.h5")
+    model = models.load_model("./test_new.h5")
 
-    #Pobranie etykiet z pliku
+    #Loading labels from file
     labels = {}
     with open('./labels.txt', 'r') as file:
         labels = json.load(file)
-    path = "./polish_1_hd/test/00d3/00d3_1083.jpg"
-    print(pred_img(model,path,labels))
-    
-    #for letter in letters:
-        #letter[1] sciezka letter[0] id
-        #wez zdjecie podaj do model.predict() i wynik zapisz w letter[0] w db
 
-    #mycursor.close()
+    #Predict all images in db
+    for letter in letters:
+        #letter[0] = path || letter[1] = id
+        pred = pred_img(model,letter[0],labels)
+        pred = uni_to_char(pred)
+        mycursor.execute(sql_update,(pred,letter[1]))
+
+    mycursor.close()
 
 
 if __name__ == "__main__":
