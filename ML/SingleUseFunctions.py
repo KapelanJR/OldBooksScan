@@ -16,7 +16,7 @@ def create_CSV(path,dst):
             fil = os.path.basename(os.path.normpath(fil))
             f.write("{},{}\n".format(fil.replace('.jpg',''),fil[0:4]))
 
-
+#Get data via FTP from remote
 def get_Data(images,sftp,dest):
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -37,9 +37,9 @@ def database_connection(host,user,password,database):
     password=password,
     database=database
     )
-    return mydb.cursor()
+    return mydb
 
-#Klasa posiadająca dane o danym znaku
+#Class representing 
 class charData:
     def __init__(self, char, unicode):
         self.char = char
@@ -47,7 +47,7 @@ class charData:
         self.count = 0
 
 
-#Lista znaków
+#List of all avaliable chars
 charList = [
     #Małe lietry
     charData('a', "0061"), charData('b', "0062"), charData('c', "0063"), charData('d', "0064"), charData('e', "0065"), charData('f', "0066"), charData('g', "0067"), charData('h', "0068"), charData('i', "0069"), charData('j', "006a"), charData('k', "006b"), charData('l', "006c"), charData('m', "006d"), charData('n', "006e"), charData('o', "006f"), charData('p', "0070"), charData('r', "0072"), charData('s', "0073"), charData('t', "0074"), charData('u', "0075"), charData('w', "0077"), charData('y', "0079"), charData('z', "007a"), 
@@ -86,7 +86,7 @@ charList = [
     #charData('"', "0022"), charData('\'', "0027")
     ]
 
-
+#Function used to move files to directories for dataset generator
 def MakeSets(train_dir,test_dir,validation_dir,base_dir):
 
     train_dir = os.path.join(train_dir,'train')
@@ -183,9 +183,8 @@ def MakeSets(train_dir,test_dir,validation_dir,base_dir):
             except Exception:
                 continue
 
-# Zamiana kluczy z wartościani wynik {indeks:unicode litery}
+#Swap dictionary keys with values {indeks: letter unicode }
 def inverse_dict(dict):
-    # Zamiana kluczy z wartościani wynik {indeks:unicode litery}
     inv_map = {v: k for k, v in dict.class_indices.items()}
     return inv_map
 
