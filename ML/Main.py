@@ -27,8 +27,8 @@ def uni_to_char(unicode):
             return uni.char
 
 def main():
-    sql_update = "UPDATE litery SET predykcja = %s WHERE id = %s"
-    db = database_connection("10.8.0.1","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
+    sql_update = "UPDATE litery SET predykcja = %s WHERE litera_id = %s"
+    db = database_connection("localhost","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
     mycursor = db.cursor()
     #Getting all letters to predict
     mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL LIMIT 100')
@@ -48,7 +48,9 @@ def main():
         pred = uni_to_char(pred)
         mycursor.execute(sql_update,(pred,letter[1]))
 
+    db.commit()
     mycursor.close()
+    db.close()
 
 
 if __name__ == "__main__":

@@ -122,7 +122,7 @@ def countWhitePixelsRows(pixels):
 def detectCorrectRotation(pixels, orgPixels):
     rowsMaxCount = countWhitePixelsRows(pixels)
     rowsMaxAngle = 0
-    for currentAngle in np.arange(-4, 4, 1/3):
+    for currentAngle in np.arange(-3, 3, 1/2):
         pixelsTest = ndimage.rotate(pixels, currentAngle, reshape=False, mode="constant", cval=1, prefilter=False)
         rowsCurrentCount = countWhitePixelsRows(pixelsTest)
         if rowsCurrentCount > rowsMaxCount:
