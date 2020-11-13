@@ -18,10 +18,10 @@ test_datagen = ImageDataGenerator(
 )
 
 test_generator = test_datagen.flow_from_directory(
-    test_dir,target_size=(20,32),batch_size=2,class_mode='categorical',shuffle=False)
+    test_dir,target_size=(20,32),batch_size=10000,class_mode='categorical',shuffle=True)
 
 model = models.load_model("./test.h5")
-#scores = model.evaluate_generator(test_generator,10000)
+scores = model.evaluate_generator(test_generator,10000)
 pred = model.predict_generator(test_generator,steps=2)
 
 
