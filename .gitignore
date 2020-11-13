@@ -5,12 +5,7 @@ datasetsGenerator/datasets/*
 charCutter/output/*
 input/jpg/*
 input/pdf/*
-<<<<<<< HEAD
-.vscode/
-polish_1_hd/*
-=======
 chars/*
 .vscode/
 ML/Old_*
 polish_1_hd/*
->>>>>>> train
