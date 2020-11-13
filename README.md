@@ -1,6 +1,5 @@
-1. On server:
-sudo apt-get python3.7
-sudo apt-get install python3-pip
-sudo python3 pip install pipenv
-pipenv shell
-pipenv sync
+0. Download Python https://www.python.org/downloads/release/python-368/
+1. pip install pipenv
+2. pipenv shell
+3. Select appropriate interperter
+4. pipenv sync

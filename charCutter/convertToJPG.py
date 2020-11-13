@@ -9,7 +9,7 @@ def generateJPGs(bookName):
     book = fitz.open(PDFdirPath + "/" + bookName)
     dirToSave = JPGdirPath + "/fromPDF_" + bookName
     if not os.path.exists(dirToSave): os.makedirs(dirToSave)
-    for page in book: page.getPixmap(matrix=fitz.Matrix(8, 8)).writeImage(JPGdirPath + "/fromPDF_" + bookName + "/" + str(page.number) + ".jpg")
+    for page in book: page.getPixmap(matrix=fitz.Matrix(8, 8)).writeImage(JPGdirPath + "/fromPDF_" + bookName + "/" + str(page.number+1) + ".jpg")
     print("Book: " + bookName + " done")
 
 def main():

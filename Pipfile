@@ -4,13 +4,16 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-numpy = "*"
+numpy = "==1.19.3"
 tensorflow = "==1.5"
 sklearn = "*"
 mysql-connector-python = "*"
 keras = "==2.1.6"
-pymupdf = "*"
+pandas = "*"
+keras-preprocessing = "*"
 pillow = "*"
+pylint = "*"
+h5py = "==2.10.0"
 
 [dev-packages]
 pylint = "*"
