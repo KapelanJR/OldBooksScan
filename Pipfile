@@ -15,6 +15,7 @@ pillow = "*"
 pylint = "*"
 h5py = "==2.10.0"
 pyenchant = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 pylint = "*"
