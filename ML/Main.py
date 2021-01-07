@@ -8,7 +8,7 @@ with warnings.catch_warnings():
 import os,shutil
 import unicodedata
 import mysql.connector
-from SingleUseFunctions import charData,charList,database_connection
+from SingleUseFunctions import *
 import json
 
 # model = trained keras model ||  path = path to image || labels = file with all possible labels
@@ -17,21 +17,24 @@ def pred_img(model,path,labels):
     input_arr = img_to_array(img)
     input_arr = np.array([input_arr])
     pred = model.predict(input_arr)
-    #Pobranie litery z najwiekszym prawdopodobienstwem
+    # Return letter with the bigest probability
     for i in pred:
         return labels[str(np.argmax(i))]
 
+# Convert unicode to character
 def uni_to_char(unicode):
     for uni in charList:
         if (uni.unicode == unicode):
             return uni.char
 
 def main():
+    check_word("wo1a")
+
     sql_update = "UPDATE litery SET predykcja = %s WHERE id = %s"
     db = database_connection("10.8.0.1","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
     mycursor = db.cursor()
-    #Getting all letters to predict
-    mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL LIMIT 100')
+    # Getting all letters to predict
+    mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL LIMIT 10')
     letters = mycursor.fetchall()
 
     model = models.load_model("./ML/test_new.h5")
