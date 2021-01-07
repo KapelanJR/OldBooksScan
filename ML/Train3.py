@@ -62,4 +62,4 @@ def train():
 
     score = model.evaluate_generator(test_generator, 10000)
 
-    model.save("{}_test.h5".format(score))
+    model.save("{}_test3.h5".format(score))
