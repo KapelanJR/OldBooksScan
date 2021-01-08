@@ -5,12 +5,8 @@ datasetsGenerator/datasets/*
 charCutter/output/*
 input/jpg/*
 input/pdf/*
-<<<<<<< HEAD
-.vscode
-=======
 chars/*
 .vscode/
 ML/Old_*
 polish_1_hd/*
 readyDatasets/*
->>>>>>> d79bd810847444b172237ae095147fccd76403d1
