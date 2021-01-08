@@ -1,4 +1,5 @@
 [[source]]
+<<<<<<< HEAD
 name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
@@ -17,3 +18,28 @@ pillow = "*"
 
 [requires]
 python_version = "3.7"
+=======
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "==1.19.3"
+tensorflow = "==1.5"
+sklearn = "*"
+mysql-connector-python = "*"
+keras = "==2.1.6"
+pandas = "*"
+keras-preprocessing = "*"
+pillow = "*"
+pylint = "*"
+h5py = "==2.10.0"
+pyenchant = "*"
+sqlalchemy = "*"
+
+[dev-packages]
+pylint = "*"
+
+[requires]
+python_version = "3.6"
+>>>>>>> d79bd810847444b172237ae095147fccd76403d1
