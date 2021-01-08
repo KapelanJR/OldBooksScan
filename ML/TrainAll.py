@@ -135,9 +135,13 @@ def train4():
     model.save("{}_test4.h5".format(score))
 
 def main():
+    print("******************** Model 1 ********************")
     train1()
+    print("******************** Model 2 ********************")
     train2()
+    print("******************** Model 3 ********************")
     train3()
+    print("******************** Model 4 ********************")
     train4()
 
 if __name__ == "__main__":
