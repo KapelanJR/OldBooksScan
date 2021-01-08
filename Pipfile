@@ -1,24 +1,4 @@
 [[source]]
-<<<<<<< HEAD
-name = "pypi"
-url = "https://pypi.org/simple"
-verify_ssl = true
-
-[dev-packages]
-pylint = "*"
-
-[packages]
-tensorflow = "*"
-keras = "*"
-scikit-learn = "*"
-scipy = "*"
-mysql-connector-python = "*"
-pandas = "*"
-pillow = "*"
-
-[requires]
-python_version = "3.7"
-=======
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
@@ -42,4 +22,3 @@ pylint = "*"
 
 [requires]
 python_version = "3.6"
->>>>>>> d79bd810847444b172237ae095147fccd76403d1
