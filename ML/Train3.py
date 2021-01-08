@@ -12,6 +12,7 @@ from keras.models import load_model
 import pandas as pd
 
 
+
 train_dir = "polish_1_hd/train"
 validation_dir = "polish_1_hd/validation"
 test_dir = "./readyDatasets/polish_1_hd/test"
@@ -44,6 +45,7 @@ model.add(layers.MaxPool2D((2, 2)))
 model.add(layers.Flatten())
 model.add(layers.Dense(128, activation='relu'))
 model.add(layers.Dense(512, activation='relu'))
+model.add(layers.Dropout(0.3))
 model.add(layers.Dense(88, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
@@ -62,3 +64,4 @@ history = model.fit_generator(
 score = model.evaluate_generator(test_generator, 10000)
 
 model.save("{}_test3.h5".format(score))
+
