@@ -21,7 +21,7 @@ test_datagen = ImageDataGenerator(rescale=1./255)
 def train1():
     train_generator = train_datagen.flow_from_directory(train_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
     validation_generator = validation_datagen.flow_from_directory(validation_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
-    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=10000,class_mode='categorical',shuffle=True)
+    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=1,class_mode='categorical',shuffle=True)
 
     model = models.Sequential()
     model.add(layers.Conv2D(256,(3,3),activation='relu',input_shape=(20,32,3)))
@@ -41,14 +41,14 @@ def train1():
         validation_steps=validation_generator.n//validation_generator.batch_size,
     )
 
-    score = model.evaluate_generator(test_generator,10000)
+    score = model.evaluate_generator(test_generator, test_generator.n)
 
-    model.save("{}_test1.h5".format(score))
+    model.save("{}_test1.h5".format(score[1]))
 
 def train2():
     train_generator = train_datagen.flow_from_directory(train_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
     validation_generator = validation_datagen.flow_from_directory(validation_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
-    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=10000,class_mode='categorical',shuffle=True)
+    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=1,class_mode='categorical',shuffle=True)
 
     model = models.Sequential()
     model.add(layers.Conv2D(256, (3, 3), activation='relu', input_shape=(20, 32, 3)))
@@ -70,14 +70,14 @@ def train2():
         validation_steps=validation_generator.n//validation_generator.batch_size,
     )
 
-    score = model.evaluate_generator(test_generator, 10000)
+    score = model.evaluate_generator(test_generator, test_generator.n)
 
-    model.save("{}_test2.h5".format(score))
+    model.save("{}_test2.h5".format(score[1]))
 
 def train3():
     train_generator = train_datagen.flow_from_directory(train_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
     validation_generator = validation_datagen.flow_from_directory(validation_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
-    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=10000,class_mode='categorical',shuffle=True)
+    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=1,class_mode='categorical',shuffle=True)
 
     model = models.Sequential()
     model.add(layers.Conv2D(64, (3, 3), activation='relu', input_shape=(20, 32, 3)))
@@ -101,14 +101,14 @@ def train3():
         validation_steps=validation_generator.n//validation_generator.batch_size,
     )
 
-    score = model.evaluate_generator(test_generator, 10000)
+    score = model.evaluate_generator(test_generator, test_generator.n)
 
-    model.save("{}_test3.h5".format(score))
+    model.save("{}_test3.h5".format(score[1]))
 
 def train4():
     train_generator = train_datagen.flow_from_directory(train_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
     validation_generator = validation_datagen.flow_from_directory(validation_dir,target_size=(20,32),batch_size=90,class_mode='categorical',shuffle=True)
-    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=10000,class_mode='categorical',shuffle=True)
+    test_generator = test_datagen.flow_from_directory(test_dir,target_size=(20,32),batch_size=1,class_mode='categorical',shuffle=True)
 
     model = models.Sequential()
     model.add(layers.Conv2D(64, (3, 3), activation='relu', input_shape=(20, 32, 3)))
@@ -130,13 +130,13 @@ def train4():
         validation_steps=validation_generator.n//validation_generator.batch_size,
     )
 
-    score = model.evaluate_generator(test_generator, 10000)
+    score = model.evaluate_generator(test_generator, test_generator.n)
 
-    model.save("{}_test4.h5".format(score))
+    model.save("{}_test4.h5".format(score[1]))
 
 def main():
-    print("******************** Model 1 ********************")
-    train1()
+    #print("******************** Model 1 ********************")
+    #train1()
     print("******************** Model 2 ********************")
     train2()
     print("******************** Model 3 ********************")

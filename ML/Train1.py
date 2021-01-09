@@ -30,7 +30,7 @@ validation_generator = validation_datagen.flow_from_directory(
 )
 
 test_generator = test_datagen.flow_from_directory(
-    test_dir,target_size=(20,32),batch_size=10000,class_mode='categorical',shuffle=True)
+    test_dir,target_size=(20,32),batch_size=1,class_mode='categorical',shuffle=True)
 
 #Architektura sieci
 model = models.Sequential()
@@ -54,7 +54,7 @@ history = model.fit_generator(
 # Evaluate trained model
 
 
-score = model.evaluate_generator(test_generator,10000)
+score = model.evaluate_generator(test_generator,test_generator.n)
 
 model.save("{}_test1.h5".format(score))
 
