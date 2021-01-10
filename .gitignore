@@ -6,6 +6,7 @@ charCutter/output/*
 input/jpg/*
 input/pdf/*
 chars/*
-.vscode/
+**/.vscode/
 ML/Old_*
 polish_1_hd/*
+readyDatasets/*
