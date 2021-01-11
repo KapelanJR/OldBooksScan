@@ -8,7 +8,7 @@ with warnings.catch_warnings():
 import os,shutil
 import unicodedata
 import mysql.connector
-from SingleUseFunctions import charData,charList,database_connection
+from SingleUseFunctions import charData, charList, database_connection
 import json
 
 # model = trained keras model ||  path = path to image || labels = file with all possible labels

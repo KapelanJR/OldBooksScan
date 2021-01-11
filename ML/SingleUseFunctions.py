@@ -1,51 +1,23 @@
 import mysql.connector
 import os
 import shutil
-
-def append_ext(fn):
-    return fn+".jpg"
+import enchant
 
 
-#Create CSV labels from paths
-#Path tuple
-def create_CSV(path,dst):
-    with open(dst,'w') as f:
-        f.write("id,label\n")
-        for i,fname in enumerate(path):
-            fil = fname
-            fil = os.path.basename(os.path.normpath(fil))
-            f.write("{},{}\n".format(fil.replace('.jpg',''),fil[0:4]))
-
-#Get data via FTP from remote
-def get_Data(images,sftp,dest):
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    dest = os.path.join(dir_path,dest)
-    if not os.path.exists(dest):
-        os.mkdir(dest)
-    for image in images:
-        fname = os.path.basename(os.path.normpath(image[0]))
-        if not os.path.exists(os.path.join(dest,fname)):
-            sftp.get(image[0],os.path.join(dest,fname))
+#                   Download polish dict 
+# Windows    https://cgit.freedesktop.org/libreoffice/dictionaries/tree/pl_PL :
+#            paste pl_PL.dic and pl_PL.aff to \.Lib\site-packages\enchant\data\mingw64\share\enchant\hunspell
+# Linux      sudo apt-get install myspell-pl
+# Instance of polish dictionary
+d = enchant.Dict("pl_PL")
 
 
-#Function used to connect to database
-def database_connection(host,user,password,database):
-    mydb = mysql.connector.connect(
-    host= host,
-    user= user,
-    password=password,
-    database=database
-    )
-    return mydb
-
-#Class representing 
+#Class representing single character
 class charData:
     def __init__(self, char, unicode):
         self.char = char
         self.unicode = unicode
         self.count = 0
-
 
 #List of all avaliable chars
 charList = [
@@ -85,6 +57,28 @@ charList = [
     #Inne znaki angielskie
     #charData('"', "0022"), charData('\'', "0027")
     ]
+
+#Get data via FTP from remote 
+def get_Data(images,sftp,dest):
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dest = os.path.join(dir_path,dest)
+    if not os.path.exists(dest):
+        os.mkdir(dest)
+    for image in images:
+        fname = os.path.basename(os.path.normpath(image[0]))
+        if not os.path.exists(os.path.join(dest,fname)):
+            sftp.get(image[0],os.path.join(dest,fname))
+
+#Function used to connect to mySQL database
+def database_connection(host,user,password,database):
+    mydb = mysql.connector.connect(
+    host= host,
+    user= user,
+    password=password,
+    database=database
+    )
+    return mydb
 
 #Function used to move files to directories for dataset generator
 def MakeSets(train_dir,test_dir,validation_dir,base_dir):
@@ -183,8 +177,36 @@ def MakeSets(train_dir,test_dir,validation_dir,base_dir):
             except Exception:
                 continue
 
-#Swap dictionary keys with values {indeks: letter unicode }
+#Swap dictionary keys with values {index: letter_unicode }
 def inverse_dict(dict):
     inv_map = {v: k for k, v in dict.class_indices.items()}
     return inv_map
 
+
+# Function which take single predicted word and returns the nearest correct word from dictionary
+def check_word(word):
+    # Counting number of letters in word
+    letters_count = 0
+    for char in word:
+        if (char.isalpha()):
+            letters_count += 1
+
+    # Swap similar numbers with letters
+    if(len(word)/letters_count > 0.5):
+        result = ""
+        for i in range(len(word)):
+            if (word[i] == '1'):
+                result += 'l'
+            elif (word[i] == '3'):
+                result += 'B'
+            elif(word[i] == '5'):
+                result += 'S'
+            else:
+                result += word[i]
+
+    # Find the most similar word in dictionary
+    suggestions = d.suggest(result)
+    for suggestion in suggestions:
+        if(len(suggestion) == len(result)):
+            return suggestion
+    return result
