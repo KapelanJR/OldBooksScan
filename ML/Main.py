@@ -31,10 +31,10 @@ def main():
     db = database_connection("localhost","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
     mycursor = db.cursor()
     #Getting all letters to predict
-    mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL LIMIT 100')
+    mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL')
     letters = mycursor.fetchall()
 
-    model = models.load_model("./test_new.h5")
+    model = models.load_model("./model.h5")
 
     #Loading labels from file
     labels = {}
