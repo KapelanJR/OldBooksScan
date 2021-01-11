@@ -306,9 +306,11 @@ def getChars(bookName, bookID, page, pageNum):
                     charPixels = getCharPixels(orgPixels, chars, line_i, word_i, char_i)
                     imagePath = dirToSave + "/" + str(char_i+1) + ".jpg"
                     Image.fromarray(charPixels).save(imagePath)
-                    imgXPos = int(chars[line_i][1][word_i][char_i][-1])
-                    imgYPos = int(chars[line_i][0][0])
-                    cur.execute("INSERT INTO litery (wyraz_id, numer_litery, pozycjaX, pozycjaY, sciezka) VALUES (%s, %s, %s, %s, %s)", (wordID, char_i+1, imgXPos, imgYPos, imagePath))
+                    x1 = int(chars[line_i][1][word_i][char_i][0])
+                    y1 = int(chars[line_i][0][0])
+                    x2 = int(chars[line_i][1][word_i][char_i][-1])
+                    y2 = int(chars[line_i][0][-1])
+                    cur.execute("INSERT INTO litery (wyraz_id, numer_litery, x1, y1, x2, y2, sciezka) VALUES (%s, %s, %s, %s, %s)", (wordID, char_i+1, x1, y1, x2, y2, imagePath))
                     db.commit()
 
     db.close()
