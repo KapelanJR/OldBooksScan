@@ -229,8 +229,7 @@ def train7():
         20, 32), batch_size=1, class_mode='categorical', shuffle=True)
 
     model = models.Sequential()
-    model.add(layers.Conv2D(
-        256, (3, 3), activation='relu', input_shape=(20, 32, 3)))
+    model.add(layers.Conv2D(256, (3, 3), activation='relu', input_shape=(20, 32, 3)))
     model.add(layers.MaxPool2D((2, 2)))
     model.add(layers.Flatten())
     model.add(layers.Dense(256, activation='relu'))
@@ -267,9 +266,8 @@ def train8():
         256, (3, 3), activation='relu', input_shape=(20, 32, 3)))
     model.add(layers.MaxPool2D((2, 2)))
     model.add(layers.Flatten())
-    model.add(layers.Dense(256, activation='relu',kernel_regularizers=regularizers.l2(0.001)))
-    model.add(layers.Dense(1024, activation='relu',
-                           kernel_regularizers=regularizers.l2(0.001)))
+    model.add(layers.Dense(256, activation='relu', kernel_regularizer=regularizers.l2(0.001)))
+    model.add(layers.Dense(1024, activation='relu', kernel_regularizer=regularizers.l2(0.001)))
     model.add(layers.Dense(88, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',
@@ -285,7 +283,7 @@ def train8():
 
     score = model.evaluate_generator(test_generator, test_generator.n)
 
-    model.save("test1_{}.h5".format(score[1]))
+    model.save("test8_{}.h5".format(score[1]))
 
 def main():
     '''
@@ -297,7 +295,6 @@ def main():
     train3()
     print("******************** Model 4 ********************")
     train4()
-    '''
     print("******************** Model 2 ********************")
     train2()
     print("******************** Model 5 ********************")
@@ -306,6 +303,7 @@ def main():
     train6()
     print("******************** Model 7 ********************")
     train7()
+    '''
     print("******************** Model 8 ********************")
     train8()
 
