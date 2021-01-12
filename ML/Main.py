@@ -34,7 +34,7 @@ def UniToChar(unicode):
 
 
 def Dictionary(book,cursor):
-    cursor.execute('SELECT l.predykcja,l.litera_id,w.wyraz_id FROM litery l JOIN wyrazy w on w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.wyraz_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE k.nazwa = "{}" ORDER BY w.wyraz_id'.format(book))
+    cursor.execute('SELECT l.predykcja,l.litera_id,w.wyraz_id FROM litery l JOIN wyrazy w on w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.linia_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE k.nazwa = "{}" ORDER BY w.wyraz_id'.format(book))
     letters = cursor.fetchall()
     updateList = []
     #[0] predyction [1] liId [2] wordId
@@ -55,6 +55,12 @@ def Dictionary(book,cursor):
             word += letters[n][0]
             ids.append(letters[n][1])
             prevId = letters[n][2]
+            if(n == len(letters) - 1):
+                word = check_word(word)
+                for k in range(len(word)):
+                    updateList.append((word[k], ids[k]))
+                    #cursor.execute('UPDATE litery SET predykcja_slownik = "{}" WHERE litera_id = {} AND predykcja_slownik IS NULL'.format(word[k], ids[k]))
+
     cursor.executemany(
         "UPDATE litery SET predykcja_slownik = %s WHERE litera_id = %s AND predykcja_slownik IS NULL",updateList)
 
@@ -152,7 +158,7 @@ def Main(book):
     mycursor = db.cursor()
 
     #Getting all letters to predict
-    mycursor.execute('SELECT l.sciezka,l.litera_id FROM litery l JOIN wyrazy w ON w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.wyraz_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE predykcja IS NULL AND k.nazwa= "{}"'.format(book))
+    mycursor.execute('SELECT l.sciezka,l.litera_id FROM litery l JOIN wyrazy w ON w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.linia_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE predykcja IS NULL AND k.nazwa= "{}"'.format(book))
     letters = mycursor.fetchall()
 
     model = models.load_model("./model.h5")
