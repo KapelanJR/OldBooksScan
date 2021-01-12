@@ -9,3 +9,6 @@ chars/*
 .vscode/
 ML/Old_*
 polish_1_hd/*
+ML/ORM/__pycache__/__init__.cpython-36.pyc
+ML/ORM/__pycache__/OrmModels.cpython-36.pyc
+ML/__pycache__/SingleUseFunctions.cpython-36.pyc

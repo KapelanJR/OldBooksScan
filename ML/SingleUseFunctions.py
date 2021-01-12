@@ -185,15 +185,22 @@ def inverse_dict(dict):
 
 # Function which take single predicted word and returns the nearest correct word from dictionary
 def check_word(word):
+    #Tells if last or first element is special character
+    last,first = "",""
+    if(len(word) < 2):
+        return word
     # Counting number of letters in word
     letters_count = 0
     for char in word:
         if (char.isalpha()):
             letters_count += 1
-
+    for n in range(1,len(word)):
+        if(word[n].isupper()):
+            word = word[:n] + word[n].lower() + word[n+1:]
+    result = ""
     # Swap similar numbers with letters
-    if(len(word)/letters_count > 0.5):
-        result = ""
+    if(letters_count != 0 and letters_count/len(word) > 0.3):
+        
         for i in range(len(word)):
             if (word[i] == '1'):
                 result += 'l'
@@ -201,12 +208,37 @@ def check_word(word):
                 result += 'B'
             elif(word[i] == '5'):
                 result += 'S'
+            elif(word[i] == '0'):
+                result += 'o'
             else:
                 result += word[i]
+    else:
+        result = word
 
     # Find the most similar word in dictionary
     suggestions = d.suggest(result)
+    if(word[-1] in (',',':','.',';','(',')','|','[',']','{','}','*')):
+        last = word[-1]
+        word = word[:-1]
+    elif(word[0] in (',', ':', '.', ';', '(', ')', '|', '[', ']', '{', '}', '*')):
+        first = word[0]
+        word = word[1:]
+
+    #If word is correct already
+    if(word in suggestions):
+        if(first != ""):
+            return first + word
+        elif(last != ""):
+            return word + last
+        return word
     for suggestion in suggestions:
-        if(len(suggestion) == len(result)):
+        if(len(suggestion) == len(word)):
+            if(first != ""):
+                return first + suggestion
+            elif(last != ""):
+                return suggestion + last
             return suggestion
+        elif(len(suggestion) == len(word) + 1):
+            if(first != "" or last != ""):
+                return suggestion
     return result
