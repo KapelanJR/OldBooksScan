@@ -150,11 +150,9 @@ def MakeCharts(book,cursor):
     LettersPerPage(book, cursor, chartSqlString, bookId,3)
     AverageWordLen(book, cursor, chartSqlString, bookId, 4)
 
-
-       
 def Main(book):
     sql_update_pred = "UPDATE litery SET predykcja = %s WHERE litera_id = %s"
-    db = database_connection("10.8.0.1","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
+    db = database_connection("localhost","tfs","3sHUCwk3)%$%?Q5U","baza_wynikowa")
     mycursor = db.cursor()
 
     #Getting all letters to predict
@@ -183,6 +181,3 @@ def Main(book):
     mycursor.close()
     db.close()
 
-
-if __name__ == "__main__":
-    Main("test1")
