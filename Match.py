@@ -55,6 +55,12 @@ def Dictionary(book,cursor):
             word += letters[n][0]
             ids.append(letters[n][1])
             prevId = letters[n][2]
+            if(n == len(letters) - 1):
+                word = check_word(word)
+                for k in range(len(word)):
+                    updateList.append((word[k], ids[k]))
+                    #cursor.execute('UPDATE litery SET predykcja_slownik = "{}" WHERE litera_id = {} AND predykcja_slownik IS NULL'.format(word[k], ids[k]))
+
     cursor.executemany(
         "UPDATE litery SET predykcja_slownik = %s WHERE litera_id = %s AND predykcja_slownik IS NULL",updateList)
 
