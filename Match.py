@@ -1,3 +1,4 @@
+from Main import main
 import warnings
 
 from keras.layers.merge import Average  
@@ -51,6 +52,10 @@ def Dictionary(book,cursor):
             word = letters[n][0]
             ids = [letters[n][1]]
             prevId = letters[n][2]
+            if(n == len(letters) - 1):
+                word = check_word(word)
+                for k in range(len(word)):
+                    updateList.append((word[k], ids[k]))
         else:
             word += letters[n][0]
             ids.append(letters[n][1])

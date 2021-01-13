@@ -7,7 +7,7 @@ import Match
 import Cutter
 
 def main(bookName):
-    #Cutter.main(bookName)
+    Cutter.main(bookName)
     Match.Main(bookName)
 
 if __name__ == "__main__":
