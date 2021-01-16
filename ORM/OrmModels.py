@@ -75,6 +75,7 @@ def WordsOnPages(bookName):
     return pages
      
 
+<<<<<<< HEAD
 def LettersOnPage(letter,page):
     
     try:
@@ -86,11 +87,23 @@ def LettersOnPage(letter,page):
             all()
     except:
         return "Zla liczba stron"
+=======
+def LettersOnPages(bookName): 
+    letters = session.query(Strony.numer_strony,func.count(Litery.litera_id)).\
+        join(Wyrazy,(Wyrazy.wyraz_id == Litery.wyraz_id)).\
+        join(Linie ,(Linie.linia_id == Wyrazy.linia_id)).\
+        join(Strony,(Strony.strona_id == Linie.strona_id)).\
+        join(Ksiazki, (Ksiazki.ksiazka_id == Strony.ksiazka_id)).\
+        filter(Ksiazki.nazwa == bookName).\
+        group_by(Strony.numer_strony).all()
+        
+>>>>>>> server
 
     session.close()
     return letters
 
 
+<<<<<<< HEAD
 def LettersInBook(letter,book):
     letters = session.query(func.count(Litery.litera_id)).\
         join(Wyrazy, (Wyrazy.wyraz_id == Litery.wyraz_id)).\
@@ -99,7 +112,34 @@ def LettersInBook(letter,book):
         join(Ksiazki,(Ksiazki.ksiazka_id == Strony.strona_id)).\
         filter(Litery.predykcja == letter, Ksiazki.nazwa == book).\
         all()
+=======
+def LettersInBook(book):
+    letters = session.query(Litery.predykcja_slownik, func.count(Litery.litera_id)).\
+        join(Wyrazy, (Wyrazy.wyraz_id == Litery.wyraz_id)).\
+        join(Linie, (Linie.linia_id == Wyrazy.linia_id)).\
+        join(Strony, (Strony.strona_id == Linie.strona_id)).\
+        join(Ksiazki, (Ksiazki.ksiazka_id == Strony.ksiazka_id)).\
+        filter(Ksiazki.nazwa == book).\
+        group_by(Litery.predykcja_slownik).\
+        order_by(Litery.predykcja_slownik).all()
+>>>>>>> server
         
     session.close()
     return letters
 
+<<<<<<< HEAD
+=======
+#Returns (PageNum,wordLen)
+def LenOfWords(book):
+    letters = session.query(Strony.numer_strony,func.count(Litery.litera_id)).\
+        join(Wyrazy, (Wyrazy.wyraz_id == Litery.wyraz_id)).\
+        join(Linie, (Linie.linia_id == Wyrazy.linia_id)).\
+        join(Strony, (Strony.strona_id == Linie.strona_id)).\
+        join(Ksiazki, (Ksiazki.ksiazka_id == Strony.ksiazka_id)).\
+        filter(Ksiazki.nazwa == book).\
+        group_by(Litery.wyraz_id,Strony.numer_strony).\
+        order_by(Strony.numer_strony).all()
+
+    session.close()
+    return letters
+>>>>>>> server
