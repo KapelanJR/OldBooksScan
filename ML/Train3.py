@@ -44,6 +44,7 @@ model.add(layers.MaxPool2D((2, 2)))
 model.add(layers.Flatten())
 model.add(layers.Dense(128, activation='relu'))
 model.add(layers.Dense(512, activation='relu'))
+model.add(layers.Dropout(0.3))
 model.add(layers.Dense(88, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
