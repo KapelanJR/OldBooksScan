@@ -15,9 +15,11 @@ pillow = "*"
 pylint = "*"
 h5py = "==2.10.0"
 pyenchant = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 pylint = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.6"

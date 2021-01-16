@@ -1,3 +1,4 @@
+from Main import main
 import warnings
 
 from keras.layers.merge import Average  
@@ -51,6 +52,10 @@ def Dictionary(book,cursor):
             word = letters[n][0]
             ids = [letters[n][1]]
             prevId = letters[n][2]
+            if(n == len(letters) - 1):
+                word = check_word(word)
+                for k in range(len(word)):
+                    updateList.append((word[k], ids[k]))
         else:
             word += letters[n][0]
             ids.append(letters[n][1])
@@ -151,6 +156,9 @@ def MakeCharts(book,cursor):
     AverageWordLen(book, cursor, chartSqlString, bookId, 4)
 
 def Main(book):
+
+    book = os.path.splitext(book)[0]
+
     sql_update_pred = "UPDATE litery SET predykcja = %s WHERE litera_id = %s"
     db = database_connection("localhost","tfs","3sHUCwk3)%$%?Q5U","baza_wynikowa")
     mycursor = db.cursor()
@@ -180,4 +188,3 @@ def Main(book):
     db.commit()
     mycursor.close()
     db.close()
-

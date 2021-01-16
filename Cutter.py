@@ -28,7 +28,7 @@ whiteColumnsToAdd = 0.002 #Liczba białych kolumn do dodania pomiędzy znakami w
 multithreadedScanning = True
 maxThreadCount = 10 #Maksymalna liczba jednocześnie działających wątków
 
-showPrints = True
+showPrints = False
 
 def devideContrast(pixels):
     imgHeight, imgWidth = pixels.shape
@@ -357,6 +357,3 @@ def main(bookName):
     scanPages(bookName, bookID)
     
     if showPrints: print("Finished")
-
-if __name__ == "__main__":
-    main(sys.argv[1])
