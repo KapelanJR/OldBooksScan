@@ -28,16 +28,15 @@ def uni_to_char(unicode):
             return uni.char
 
 def main():
-    check_word("wo1a")
 
     sql_update = "UPDATE litery SET predykcja = %s WHERE id = %s"
     db = database_connection("10.8.0.1","kacper","5fUwXohpL6rh5xvK","baza_wynikowa")
     mycursor = db.cursor()
     # Getting all letters to predict
-    mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL LIMIT 10')
+    mycursor.execute('SELECT sciezka,litera_id FROM litery WHERE predykcja IS NULL')
     letters = mycursor.fetchall()
 
-    model = models.load_model("./ML/test_new.h5")
+    model = models.load_model("0.9445_test1.h5")
 
     #Loading labels from file
     labels = {}
