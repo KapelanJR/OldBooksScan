@@ -275,8 +275,8 @@ def getCharPixels(orgPixels, chars, line_i, word_i, char_i):
 
     return charPixels
 
-def getChars(bookPathNoExtension, bookID, page, pageNum):
-    img = Image.open(inputsDirName + "/" + bookPathNoExtension + "/" + page).convert('L')
+def getChars(bookID, page, pageNum):
+    img = Image.open(inputsDirName + "/" + str(bookID) + "/" + page).convert('L')
     orgPixels = np.array(img, dtype="uint8")
     pixels, orgPixels = cleanPixels(orgPixels)
     chars = detectChars(pixels, orgPixels)
@@ -284,7 +284,7 @@ def getChars(bookPathNoExtension, bookID, page, pageNum):
     db = mysql.connector.connect(host="localhost", user="tfs", password="3sHUCwk3)%$%?Q5U", database="baza_wynikowa")
     cur = db.cursor()
 
-    cur.execute("INSERT INTO strony (ksiazka_id, numer_strony, sciezka) VALUES (%s, %s, %s)", (bookID, os.path.splitext(page)[0], inputsDirName + "/" + bookPathNoExtension + "/" + page))
+    cur.execute("INSERT INTO strony (ksiazka_id, numer_strony, sciezka) VALUES (%s, %s, %s)", (bookID, os.path.splitext(page)[0], inputsDirName + "/" + str(bookID) + "/" + page))
     db.commit()
     cur.execute("SELECT LAST_INSERT_ID()")
     pageID = int(cur.fetchone()[0])
@@ -316,8 +316,8 @@ def getChars(bookPathNoExtension, bookID, page, pageNum):
     db.close()
     if showPrints: print("  Page " + str(pageNum+1) + " done" )
 
-def scanPages(bookPathNoExtension, bookID):
-    pages = os.listdir(inputsDirName + "/" + bookPathNoExtension)
+def scanPages(bookID):
+    pages = os.listdir(inputsDirName + "/" + str(bookID))
 
     if multithreadedScanning:
         for i in range(0, len(pages), maxThreadCount):
@@ -326,17 +326,17 @@ def scanPages(bookPathNoExtension, bookID):
             if len(pages[i:]) < 10: tc = len(pages[i:])
 
             for page_i in range(i, i+tc):
-                t = threading.Thread(target = getChars, args = [bookPathNoExtension, bookID, pages[page_i], page_i])
+                t = threading.Thread(target = getChars, args = [bookID, pages[page_i], page_i])
                 threads.append(t)
 
             for t in threads: t.start()
             for t in threads: t.join()
     else:
-        for page_i in range(len(pages)): getChars(bookPathNoExtension, bookID, pages[page_i], page_i)
+        for page_i in range(len(pages)): getChars(bookID, pages[page_i], page_i)
 
-def convertPDFPagesToJPG(bookPathNoExtension, bookID):
-    book = fitz.open(PDFFileDirName + "/" + bookPathNoExtension + ".pdf")
-    dirToSave = inputsDirName + "/" + bookPathNoExtension
+def convertPDFPagesToJPG(bookPath, bookID):
+    book = fitz.open(PDFFileDirName + "/" + bookPath)
+    dirToSave = inputsDirName + "/" + str(bookID)
     if not os.path.exists(dirToSave): os.makedirs(dirToSave)
     for page in book: page.getPixmap(matrix=fitz.Matrix(8, 8)).writeImage(dirToSave + "/" + str(page.number) + ".jpg")
     if showPrints: print("Converting PDF pages to JPG pages done")
@@ -345,15 +345,13 @@ def main(bookPath, bookName):
     db = mysql.connector.connect(host="localhost", user="tfs", password="3sHUCwk3)%$%?Q5U", database="baza_wynikowa")
     cur = db.cursor()
 
-    bookPathNoExtension = os.path.splitext(bookPath)[0]
-
-    cur.execute("INSERT INTO ksiazki (nazwa, sciezka) VALUES (%s, %s)", (bookName, PDFFileDirName + "/" + bookPathNoExtension + ".pdf"))
+    cur.execute("INSERT INTO ksiazki (nazwa, sciezka) VALUES (%s, %s)", (bookName, PDFFileDirName + "/" + bookPath))
     db.commit()
     cur.execute("SELECT LAST_INSERT_ID()")
     bookID = int(cur.fetchone()[0])
     db.close()
 
-    convertPDFPagesToJPG(bookPathNoExtension, bookID)
-    scanPages(bookPathNoExtension, bookID)
+    convertPDFPagesToJPG(bookPath, bookID)
+    scanPages(bookID)
     
     if showPrints: print("Finished")
