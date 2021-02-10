@@ -1,14 +1,14 @@
 import warnings
 
-warnings.filterwarnings("ignore")
+warnings.simplefilter(action = "ignore", category = FutureWarning)
 
 import sys
 import Match
 import Cutter
 
-def main(bookName):
-    Cutter.main(bookName)
-    Match.Main(bookName)
+def main(bookPath, bookName):
+    Cutter.main(bookPath, bookName)
+    Match.Main(bookPath)
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
