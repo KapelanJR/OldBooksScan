@@ -355,3 +355,5 @@ def main(bookPath, bookName):
     scanPages(bookID)
     
     if showPrints: print("Finished")
+
+    return bookID

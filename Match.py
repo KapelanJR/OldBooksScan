@@ -34,8 +34,8 @@ def UniToChar(unicode):
             return uni.char
 
 
-def Dictionary(book,cursor):
-    cursor.execute('SELECT l.predykcja,l.litera_id,w.wyraz_id FROM litery l JOIN wyrazy w on w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.linia_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE k.nazwa = "{}" ORDER BY w.wyraz_id'.format(book))
+def Dictionary(bookID, cursor):
+    cursor.execute('SELECT l.predykcja,l.litera_id,w.wyraz_id FROM litery l JOIN wyrazy w on w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.linia_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE k.ksiazka_id = "{}" ORDER BY w.wyraz_id'.format(str(bookID)))
     letters = cursor.fetchall()
     updateList = []
     #[0] predyction [1] liId [2] wordId
@@ -143,28 +143,22 @@ def AverageWordLen(book, cursor, chartSqlString, bookId, n):
     cursor.executemany(
         "INSERT INTO wartosci(wykres_id,x,y) VALUES(%s,%s,%s)", res)
 
-def MakeCharts(book,cursor):
+def MakeCharts(bookID, bookName, cursor):
     chartSqlString = 'INSERT INTO wykresy(ksiazka_id,typ_id) VALUES({},{})'
-    #Get bookId
-    cursor.execute(
-        'SELECT k.ksiazka_id FROM ksiazki k WHERE k.nazwa= "{}"'.format(book))
-    bookId = cursor.fetchall()[0][0]
 
-    WordOnPages(book,cursor,chartSqlString,bookId,1)
-    LettersInBooks(book, cursor, chartSqlString, bookId,2)
-    LettersPerPage(book, cursor, chartSqlString, bookId,3)
-    AverageWordLen(book, cursor, chartSqlString, bookId, 4)
+    WordOnPages(bookName, cursor, chartSqlString, bookID, 1)
+    LettersInBooks(bookName, cursor, chartSqlString, bookID, 2)
+    LettersPerPage(bookName, cursor, chartSqlString, bookID, 3)
+    AverageWordLen(bookName, cursor, chartSqlString, bookID, 4)
 
-def Main(book):
-
-    book = os.path.splitext(book)[0]
+def Main(bookID, bookName):
 
     sql_update_pred = "UPDATE litery SET predykcja = %s WHERE litera_id = %s"
     db = database_connection("localhost","tfs","3sHUCwk3)%$%?Q5U","baza_wynikowa")
     mycursor = db.cursor()
 
     #Getting all letters to predict
-    mycursor.execute('SELECT l.sciezka,l.litera_id FROM litery l JOIN wyrazy w ON w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.linia_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE predykcja IS NULL AND k.nazwa= "{}"'.format(book))
+    mycursor.execute('SELECT l.sciezka,l.litera_id FROM litery l JOIN wyrazy w ON w.wyraz_id = l.wyraz_id JOIN linie li ON li.linia_id = w.linia_id JOIN strony s on s.strona_id = li.strona_id JOIN ksiazki k on k.ksiazka_id = s.ksiazka_id WHERE predykcja IS NULL AND k.ksiazka_id = "{}"'.format(str(bookID)))
     letters = mycursor.fetchall()
 
     model = models.load_model("./model.h5")
@@ -182,9 +176,9 @@ def Main(book):
         mycursor.execute(sql_update_pred,(pred,letter[1]))
     db.commit()
 
-    Dictionary(book, mycursor)
+    Dictionary(bookID, mycursor)
     db.commit()
-    MakeCharts(book, mycursor)
+    MakeCharts(bookID, bookName, mycursor)
     db.commit()
     mycursor.close()
     db.close()
