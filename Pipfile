@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 numpy = "==1.19.3"
-tensorflow = "==1.5"
+tensorflow = "==2.4.2"
 sklearn = "*"
 mysql-connector-python = "*"
 keras = "==2.1.6"
